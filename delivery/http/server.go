@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Port string `json:"port"`
+	Port string `koanf:"port"`
 }
 
 type Server struct {
