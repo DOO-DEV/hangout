@@ -1,43 +1,57 @@
-package auth
+package authservice
 
 import (
-	"github.com/google/uuid"
+	"fmt"
+	"github.com/golang-jwt/jwt/v4"
 	"hangout/entity"
-	param "hangout/param/http"
+	"time"
 )
 
 type Config struct {
-}
-
-type repository interface {
-	Register(user *entity.User) error
+	SignKey string `koanf:"sign_key"`
+	Prefix  string `koanf:"prefix"`
 }
 
 type Service struct {
-	repo repository
+	config Config
 }
 
-func New(repo repository) Service {
-	return Service{
-		repo: repo,
-	}
+func New(cfg Config) Service {
+	return Service{config: cfg}
 }
 
-func (s Service) Register(req param.RegisterRequest) (*param.RegisterResponse, error) {
-	u := &entity.User{
-		ID:       uuid.NewString(),
-		FirsName: req.FirstName,
-		LastName: req.LastName,
-		Password: req.Password,
+func (s Service) CreateToken(u *entity.User) (string, error) {
+	claims := Claims{
+		Username: u.Username,
+		ID:       u.ID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    u.Username,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+		},
 	}
 
-	if err := s.repo.Register(u); err != nil {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	fmt.Println(s.config.SignKey)
+	tokenString, err := token.SignedString([]byte(s.config.SignKey))
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func (s Service) ParseToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.config.SignKey), nil
+	})
+	if err != nil {
 		return nil, err
 	}
 
-	return &param.RegisterResponse{}, nil
-}
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
 
-func (s Service) Login() {
-
+	return nil, err
 }
