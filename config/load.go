@@ -11,12 +11,12 @@ func Load() *Config {
 	k := koanf.New(".")
 
 	if err := k.Load(file.Provider("config.yml"), yaml.Parser()); err != nil {
-		log.Printf("error loading config.yml: %s", err)
+		log.Printf("apperror loading config.yml: %s", err)
 	}
 
 	cfg := &Config{}
 	if err := k.Unmarshal("", cfg); err != nil {
-		log.Fatalf("error unmarshaling config: %s", err)
+		log.Fatalf("apperror unmarshaling config: %s", err)
 	}
 
 	if cfg.Debug {

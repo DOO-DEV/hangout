@@ -1,7 +1,10 @@
 package entity
 
+import "time"
+
 type Group struct {
 	ID        string
-	CreatorID string
-	Users     []User
+	Owner     string
+	Name      string
+	CreatedAt time.Time
 }

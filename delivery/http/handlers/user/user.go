@@ -3,6 +3,7 @@ package user_handler
 import (
 	"github.com/labstack/echo/v4"
 	param "hangout/param/http"
+	"hangout/pkg/httperr"
 	"net/http"
 )
 
@@ -19,7 +20,8 @@ func (h Handler) Register(c echo.Context) error {
 
 	res, err := h.userSvc.Register(c.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
 	}
 
 	return c.JSON(http.StatusCreated, res)
@@ -38,8 +40,8 @@ func (h Handler) Login(c echo.Context) error {
 
 	res, err := h.userSvc.Login(c.Request().Context(), req)
 	if err != nil {
-		// TODO - find the under error and send right status and message
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
 	}
 
 	return c.JSON(http.StatusOK, res)

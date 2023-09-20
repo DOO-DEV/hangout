@@ -6,12 +6,15 @@ import (
 	"hangout/entity"
 	param "hangout/param/http"
 	"hangout/pkg/password"
+	"hangout/pkg/richerror"
 )
 
 func (s Service) Register(ctx context.Context, req param.RegisterRequest) (*param.RegisterResponse, error) {
+	const op = "UserService.Register"
+
 	hashedPassword, err := password.EncodePassword(req.Password)
 	if err != nil {
-		return nil, err
+		return nil, richerror.New(op).WithError(err)
 	}
 	u := &entity.User{
 		ID:       uuid.NewString(),
@@ -22,7 +25,7 @@ func (s Service) Register(ctx context.Context, req param.RegisterRequest) (*para
 	}
 
 	if err := s.repo.Register(ctx, u); err != nil {
-		return nil, err
+		return nil, richerror.New(op).WithError(err)
 	}
 
 	return &param.RegisterResponse{}, nil

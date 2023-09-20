@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	SignKey string `koanf:"sign_key"`
-	Prefix  string `koanf:"prefix"`
+	SignKey                  string `koanf:"sign_key"`
+	Prefix                   string `koanf:"prefix"`
+	AuthMiddlewareContextKey string `koanf:"auth_middleware_context_key"`
 }
 
 type Service struct {
@@ -31,7 +32,6 @@ func (s Service) CreateToken(u *entity.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	fmt.Println(s.config.SignKey)
 	tokenString, err := token.SignedString([]byte(s.config.SignKey))
 	if err != nil {
 		fmt.Println(err)

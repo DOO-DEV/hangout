@@ -2,11 +2,10 @@ package uservalidator
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	param "hangout/param/http"
-	customerr "hangout/pkg/error"
+	"hangout/pkg/apperror"
 	"time"
 )
 
@@ -32,13 +31,13 @@ func (v Validator) checkUserExists(value interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	user, err := v.repo.GetUserByUsername(ctx, username)
-	if errors.Is(err, customerr.RecordNotFoundErr) {
+	exists, err := v.repo.IsUserExists(ctx, username)
+	if !exists && err == nil {
 		return nil
 	}
 
-	if err == nil && user != nil {
-		return customerr.UserExistErr
+	if exists && err == nil {
+		return apperror.UserExistErr
 	}
 
 	return fmt.Errorf("something went wrong")

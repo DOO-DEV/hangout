@@ -10,10 +10,5 @@ CREATE TABLE IF NOT EXISTS "users" (
   UNIQUE("username")
 );
 
-CREATE TABLE IF NOT EXISTS "groups" (
-    "id" TEXT,
-    "name" TEXT
-);
-
 -- +migrate Down
 DROP TABLE IF EXISTS "users";

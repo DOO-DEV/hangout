@@ -2,13 +2,13 @@ package password
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"hangout/pkg/error"
+	"hangout/pkg/apperror"
 )
 
 func EncodePassword(passwordStr string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(passwordStr), bcrypt.DefaultCost)
 	if err != nil {
-		return "", customerr.EncodePasswordErr
+		return "", apperror.EncodePasswordErr
 	}
 
 	return string(hash), nil
@@ -16,7 +16,7 @@ func EncodePassword(passwordStr string) (string, error) {
 
 func DecodePassword(rowPassword, hashedPassword string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(rowPassword)); err != nil {
-		return customerr.DecodePasswordErr
+		return apperror.DecodePasswordErr
 	}
 
 	return nil

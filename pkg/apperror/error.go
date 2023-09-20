@@ -1,4 +1,4 @@
-package customerr
+package apperror
 
 import "errors"
 
