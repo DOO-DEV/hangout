@@ -12,4 +12,4 @@ postgres:
 auth:
   sign_key:
   prefix:
-  auth_middleware_context_key: 
+  auth_middleware_context_key:
