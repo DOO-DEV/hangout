@@ -12,6 +12,8 @@ type Repository interface {
 	CheckUserGroup(ctx context.Context, username string) (bool, error)
 	AddToPendingList(ctx context.Context, list entity.PendingList) error
 	ListJoinRequest(ctx context.Context, userID string) ([]entity.PendingList, error)
+	GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, error)
+	ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error)
 }
 
 type Service struct {

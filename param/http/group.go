@@ -53,3 +53,14 @@ type PendingJoinReq struct {
 type ListJoinRequestsResponse struct {
 	Data []PendingJoinReq `json:"data"`
 }
+
+type MemberRequestToMyGroup struct {
+	User   string    `json:"user"`
+	SentAt time.Time `json:"sent_at"`
+}
+type ListJoinRequestsToMyGroupRequest struct {
+}
+
+type ListJoinRequestsToMyGroupResponse struct {
+	Data []MemberRequestToMyGroup `json:"data"`
+}

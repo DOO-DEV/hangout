@@ -106,7 +106,7 @@ func (d DB) AddToPendingList(ctx context.Context, p entity.PendingList) error {
 func (d DB) ListJoinRequest(ctx context.Context, userID string) ([]entity.PendingList, error) {
 	const op = "GroupRepository.ListJoinRequest"
 
-	rows, err := d.conn.Conn().QueryContext(ctx, `select "group_id", "sent_at" from "pending_list" where "user_id" = $1 order by "sent_at" desc`, userID)
+	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "pending_list" where "user_id" = $1 order by "sent_at" desc`, userID)
 	defer rows.Close()
 	if err != nil {
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
@@ -115,7 +115,43 @@ func (d DB) ListJoinRequest(ctx context.Context, userID string) ([]entity.Pendin
 	list := make([]entity.PendingList, 0)
 	for rows.Next() {
 		p := entity.PendingList{}
-		err := rows.Scan(&p.GroupId, &p.SentAt)
+		err := rows.Scan(&p.UserID, &p.GroupId, &p.SentAt)
+		if err != nil {
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		list = append(list, p)
+	}
+
+	return list, nil
+}
+
+func (d DB) GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, error) {
+	const op = "GroupRepository.CheckGroupOwner"
+	g := &entity.Group{}
+	row := d.conn.Conn().QueryRowContext(ctx, `select "id" from "groups" where "owner_id" = $1`, userID)
+	if err := row.Scan(&g.ID); err != nil {
+		if isEmptyRowError(err) {
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindForbidden).WithMessage(errmsg.ErrorMsgUserNotAllowed)
+		}
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgCantScanQueryResult)
+	}
+
+	return g, nil
+}
+
+func (d DB) ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error) {
+	const op = "GroupRepository.ListAllJoinRequestToMyGroup"
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "pending_list" where "group_id" = $1 order by "sent_at" desc`, groupID)
+	defer rows.Close()
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
+	}
+
+	list := make([]entity.PendingList, 0)
+	for rows.Next() {
+		p := entity.PendingList{}
+		err := rows.Scan(&p.UserID, &p.GroupId, &p.SentAt)
 		if err != nil {
 			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
 		}
@@ -128,6 +164,14 @@ func (d DB) ListJoinRequest(ctx context.Context, userID string) ([]entity.Pendin
 func isDuplicateKeyError(err error) bool {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return true
+	}
+
+	return false
+}
+
+func isEmptyRowError(err error) bool {
+	if errors.Is(err, sql.ErrNoRows) {
 		return true
 	}
 
