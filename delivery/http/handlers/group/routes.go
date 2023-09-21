@@ -17,4 +17,7 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	request.GET("", h.ListMyJoinRequest)
 	request.GET("/group", h.ListJoinRequestToMyGroup)
 	request.POST("/accept", h.AcceptJoin)
+
+	conReq := g.Group("/connection_requests", authmiddleware.Auth(h.authSvc, h.authConfig))
+	conReq.POST("", h.ConnectGroups)
 }

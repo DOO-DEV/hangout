@@ -20,3 +20,7 @@ func (v Validator) ValidateJoinToGroupRequest(req param.JoinRequest) error {
 func (v Validator) ValidateAcceptJoinRequest(req param.AcceptJoinRequest) error {
 	return validation.ValidateStruct(&req, validation.Field(&req.UserID, validation.Required))
 }
+
+func (v Validator) ValidateGroupConnectionRequest(req param.GroupConnectionRequest) error {
+	return validation.ValidateStruct(&req, validation.Field(&req.GroupID, validation.Required))
+}

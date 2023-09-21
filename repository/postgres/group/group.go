@@ -209,6 +209,24 @@ func (d DB) MoveFromPendingListToGroup(ctx context.Context, groupID string, user
 	return nil
 }
 
+func (d DB) ConnectGroups(ctx context.Context, g1, g2 string) error {
+	const op = "GroupRepository.ConnectGroup"
+
+	_, err := d.conn.Conn().ExecContext(ctx, `insert into "groups_connections"("from", "to") values ($1, $2)`, g1, g2)
+	if err != nil {
+		fmt.Println(err)
+		if isForeignKeyError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgGroupNotFound)
+		}
+		if isDuplicateKeyError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgByDirectional)
+		}
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
+}
+
 func isDuplicateKeyError(err error) bool {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -220,6 +238,15 @@ func isDuplicateKeyError(err error) bool {
 
 func isEmptyRowError(err error) bool {
 	if errors.Is(err, sql.ErrNoRows) {
+		return true
+	}
+
+	return false
+}
+
+func isForeignKeyError(err error) bool {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
 		return true
 	}
 

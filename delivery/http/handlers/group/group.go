@@ -117,3 +117,24 @@ func (h Handler) AcceptJoin(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) ConnectGroups(c echo.Context) error {
+	var req param.GroupConnectionRequest
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.validator.ValidateGroupConnectionRequest(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+	res, err := h.groupSvc.GroupConnectionRequest(c.Request().Context(), req, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}

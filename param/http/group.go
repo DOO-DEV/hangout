@@ -71,3 +71,10 @@ type AcceptJoinRequest struct {
 
 type AcceptJoinResponse struct {
 }
+
+type GroupConnectionRequest struct {
+	GroupID string `json:"group_id"`
+}
+
+type GroupConnectionResponse struct {
+}

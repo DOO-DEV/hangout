@@ -15,6 +15,7 @@ type Repository interface {
 	GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, error)
 	ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error)
 	MoveFromPendingListToGroup(ctx context.Context, groupID string, userID string) error
+	ConnectGroups(ctx context.Context, g1, g2 string) error
 }
 
 type Service struct {

@@ -8,4 +8,6 @@ const (
 	ErrorMsgUserNotAllowed        = "user not allowed"
 	ErrorMsgYouAlreadySendRequest = "you sent join request to this group"
 	ErrorMsgAlreadyJoinedGroup    = "you can just be a member of one group"
+	ErrorMsgByDirectional         = "you have already a request from this group"
+	ErrorMsgGroupNotFound         = "group not found"
 )
