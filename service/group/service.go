@@ -10,6 +10,7 @@ type Repository interface {
 	GetAllGroups(ctx context.Context) ([]*entity.Group, error)
 	GetMyGroup(ctx context.Context, userID string) ([]entity.Member, error)
 	CheckUserGroup(ctx context.Context, username string) (bool, error)
+	AddToPendingList(ctx context.Context, list entity.PendingList) error
 }
 
 type Service struct {

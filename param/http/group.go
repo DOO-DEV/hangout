@@ -35,3 +35,10 @@ type GetMyGroupResponse struct {
 	Group   string       `json:"group"`
 	Members []MemberInfo `json:"members"`
 }
+
+type JoinRequest struct {
+	GroupID string `json:"group_id"`
+}
+
+type JoinResponse struct {
+}

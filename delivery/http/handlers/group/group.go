@@ -49,3 +49,24 @@ func (h Handler) GetMyGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) JoinGroup(c echo.Context) error {
+	var req param.JoinRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.validator.ValidateJoinToGroupRequest(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+
+	res, err := h.groupSvc.JoinGroup(c.Request().Context(), req, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}

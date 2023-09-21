@@ -9,8 +9,8 @@ func Error(err error) (int, string) {
 	switch err.(type) {
 	case richerror.RichError:
 		rErr := err.(richerror.RichError)
-		code := mapKindToStatusCode(rErr.Kind)
-		msg := rErr.Message
+		code := mapKindToStatusCode(rErr.Kind())
+		msg := rErr.Message()
 
 		if code >= 500 {
 			msg = "something went wrong"

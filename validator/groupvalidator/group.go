@@ -10,3 +10,9 @@ func (v Validator) ValidateCreateGroupRequest(req param.CreateGroupRequest) erro
 		validation.Field(&req.Name, validation.Required),
 	)
 }
+
+func (v Validator) ValidateJoinToGroupRequest(req param.JoinRequest) error {
+	return validation.ValidateStruct(&req,
+		validation.Field(&req.GroupID, validation.Required),
+	)
+}

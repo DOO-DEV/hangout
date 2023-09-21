@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"hangout/entity"
+	"hangout/pkg/errmsg"
 	"hangout/pkg/richerror"
 	"time"
 )
@@ -86,4 +88,26 @@ func (d DB) GetMyGroup(ctx context.Context, userID string) ([]entity.Member, err
 	}
 
 	return members, nil
+}
+
+func (d DB) AddToPendingList(ctx context.Context, p entity.PendingList) error {
+	const op = "GroupRepository.AddToPendingList"
+
+	if _, err := d.conn.Conn().ExecContext(ctx, `insert into "pending_list"("user_id", "group_id") values ($1, $2)`, p.UserID, p.GroupId); err != nil {
+		if isDuplicateKeyError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgYouAlreadySendRequest)
+		}
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
+	}
+
+	return nil
+}
+
+func isDuplicateKeyError(err error) bool {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return true
+	}
+
+	return false
 }
