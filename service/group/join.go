@@ -4,6 +4,7 @@ import (
 	"context"
 	"hangout/entity"
 	param "hangout/param/http"
+	"hangout/pkg/errmsg"
 	"hangout/pkg/richerror"
 )
 
@@ -11,7 +12,7 @@ func (s Service) JoinGroup(ctx context.Context, req param.JoinRequest, userID st
 	const op = "GroupService.JoinGroup"
 	hasGroup, err := s.repo.CheckUserGroup(ctx, userID)
 	if hasGroup {
-		return nil, richerror.New(op).WithError(err).WithMessage("each user can join only one group")
+		return nil, richerror.New(op).WithError(err).WithMessage(errmsg.ErrorMsgAlreadyJoinedGroup)
 	}
 
 	p := entity.PendingList{

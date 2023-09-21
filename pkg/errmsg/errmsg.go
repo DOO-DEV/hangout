@@ -7,4 +7,5 @@ const (
 	ErrorMsgInvalidInput          = "invalid input"
 	ErrorMsgUserNotAllowed        = "user not allowed"
 	ErrorMsgYouAlreadySendRequest = "you sent join request to this group"
+	ErrorMsgAlreadyJoinedGroup    = "you can just be a member of one group"
 )
