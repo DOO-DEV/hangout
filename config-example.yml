@@ -1,3 +1,15 @@
 debug: true
+
 http_server:
   port: 3000
+
+postgres:
+  username:
+  password:
+  name:
+  host:
+
+auth:
+  sign_key:
+  prefix:
+  auth_middleware_context_key: 
