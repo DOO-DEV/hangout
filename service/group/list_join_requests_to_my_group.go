@@ -2,7 +2,6 @@ package groupservice
 
 import (
 	"context"
-	"fmt"
 	param "hangout/param/http"
 	"hangout/pkg/richerror"
 )
@@ -14,7 +13,6 @@ func (s Service) ListJoinRequestToMyGroup(ctx context.Context, _ param.ListJoinR
 	if gr == nil {
 		return nil, richerror.New(op).WithError(err)
 	}
-	fmt.Printf("%+v\n", gr)
 	list, err := s.repo.ListAllJoinRequestToMyGroup(ctx, gr.ID)
 	if err != nil {
 		return nil, richerror.New(op).WithError(err)

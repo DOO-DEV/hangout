@@ -142,7 +142,8 @@ func (d DB) GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, er
 func (d DB) ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error) {
 	const op = "GroupRepository.ListAllJoinRequestToMyGroup"
 
-	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "pending_list" where "group_id" = $1 order by "sent_at" desc`, groupID)
+	fmt.Println(groupID)
+	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "pending_list" where "group_id" = $1 and "active"='true' order by "sent_at" desc`, groupID)
 	defer rows.Close()
 	if err != nil {
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
@@ -151,14 +152,61 @@ func (d DB) ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]
 	list := make([]entity.PendingList, 0)
 	for rows.Next() {
 		p := entity.PendingList{}
-		err := rows.Scan(&p.UserID, &p.GroupId, &p.SentAt)
+		err := rows.Scan(&p.UserID, &p.GroupId, &p.SentAt, &p.Active)
 		if err != nil {
-			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+			if isEmptyRowError(err) {
+				return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+			}
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 		}
+
 		list = append(list, p)
 	}
 
 	return list, nil
+}
+
+func (d DB) MoveFromPendingListToGroup(ctx context.Context, groupID string, userID string) error {
+	const op = "GroupRepository.MoveFromPendingListToGroup"
+
+	fmt.Println("user: ", userID, "group: ", groupID)
+	p := entity.PendingList{}
+	row := d.conn.Conn().QueryRowContext(ctx, `select * from "pending_list" where "user_id" = $1 and "group_id" = $2`, userID, groupID)
+	if err := row.Scan(&p.UserID, &p.GroupId, &p.SentAt, &p.Active); err != nil {
+		if isEmptyRowError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgCantScanQueryResult)
+	}
+
+	// remove this pending request and change the active status of rest of them to false
+	tx, err := d.conn.Conn().BeginTx(ctx, nil)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+	// remove this request
+	_, err = tx.ExecContext(ctx, `delete from "pending_list" where "user_id" = $1 and "group_id" = $2`, userID, groupID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	_, err = tx.ExecContext(ctx, `update "pending_list" set "active" = 'false' where "user_id" = $1`, userID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	// move this user to "users_group"
+	_, err = tx.ExecContext(ctx, `insert into "users_group"("user_id", "group_id", "role") values ($1, $2,$3)`, userID, groupID, "normal")
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
 }
 
 func isDuplicateKeyError(err error) bool {

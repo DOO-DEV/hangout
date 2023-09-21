@@ -95,3 +95,25 @@ func (h Handler) ListJoinRequestToMyGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) AcceptJoin(c echo.Context) error {
+	var req param.AcceptJoinRequest
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.validator.ValidateAcceptJoinRequest(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+
+	res, err := h.groupSvc.AcceptJoinRequest(c.Request().Context(), req, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

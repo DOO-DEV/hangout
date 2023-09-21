@@ -64,3 +64,10 @@ type ListJoinRequestsToMyGroupRequest struct {
 type ListJoinRequestsToMyGroupResponse struct {
 	Data []MemberRequestToMyGroup `json:"data"`
 }
+
+type AcceptJoinRequest struct {
+	UserID string `json:"user_id"`
+}
+
+type AcceptJoinResponse struct {
+}

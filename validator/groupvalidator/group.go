@@ -16,3 +16,7 @@ func (v Validator) ValidateJoinToGroupRequest(req param.JoinRequest) error {
 		validation.Field(&req.GroupID, validation.Required),
 	)
 }
+
+func (v Validator) ValidateAcceptJoinRequest(req param.AcceptJoinRequest) error {
+	return validation.ValidateStruct(&req, validation.Field(&req.UserID, validation.Required))
+}

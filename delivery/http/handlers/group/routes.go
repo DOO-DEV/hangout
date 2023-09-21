@@ -16,4 +16,5 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	request.POST("", h.JoinGroup)
 	request.GET("", h.ListMyJoinRequest)
 	request.GET("/group", h.ListJoinRequestToMyGroup)
+	request.POST("/accept", h.AcceptJoin)
 }
