@@ -42,3 +42,14 @@ type JoinRequest struct {
 
 type JoinResponse struct {
 }
+
+type ListJoinRequest struct {
+}
+
+type PendingJoinReq struct {
+	SentAt time.Time `json:"sent_at"`
+	Group  string    `json:"group"`
+}
+type ListJoinRequestsResponse struct {
+	Data []PendingJoinReq `json:"data"`
+}

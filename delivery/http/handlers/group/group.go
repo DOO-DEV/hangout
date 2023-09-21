@@ -70,3 +70,16 @@ func (h Handler) JoinGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, res)
 }
+
+func (h Handler) ListMyJoinRequest(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+
+	res, err := h.groupSvc.ListAllJoinRequests(c.Request().Context(), param.ListJoinRequest{}, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+
+}

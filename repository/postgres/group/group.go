@@ -103,6 +103,28 @@ func (d DB) AddToPendingList(ctx context.Context, p entity.PendingList) error {
 	return nil
 }
 
+func (d DB) ListJoinRequest(ctx context.Context, userID string) ([]entity.PendingList, error) {
+	const op = "GroupRepository.ListJoinRequest"
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select "group_id", "sent_at" from "pending_list" where "user_id" = $1 order by "sent_at" desc`, userID)
+	defer rows.Close()
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
+	}
+
+	list := make([]entity.PendingList, 0)
+	for rows.Next() {
+		p := entity.PendingList{}
+		err := rows.Scan(&p.GroupId, &p.SentAt)
+		if err != nil {
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		list = append(list, p)
+	}
+
+	return list, nil
+}
+
 func isDuplicateKeyError(err error) bool {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
