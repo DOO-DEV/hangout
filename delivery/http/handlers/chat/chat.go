@@ -48,3 +48,15 @@ func (h Handler) GetChatMessages(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) GetUserChats(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+
+	res, err := h.chatSvc.ListUserChats(c.Request().Context(), param.GetUserChatsRequest{}, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
