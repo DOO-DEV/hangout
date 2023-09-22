@@ -231,7 +231,7 @@ func (d DB) ConnectGroups(ctx context.Context, g1, g2 string) error {
 func (d DB) ListMyGroupConnections(ctx context.Context, groupID string) ([]dbparam.GroupConnection, error) {
 	const op = "GroupRepository.ListMyGroupConnections"
 
-	rows, err := d.conn.Conn().QueryContext(ctx, `select "from", "created_at" from "groups_connections" where "to" = $1`, groupID)
+	rows, err := d.conn.Conn().QueryContext(ctx, `select "from", "created_at" from "groups_connections" where "to" = $1 and "accept" = 'false' order by "created_at" desc`, groupID)
 	if err != nil {
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
