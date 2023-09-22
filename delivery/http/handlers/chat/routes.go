@@ -10,5 +10,6 @@ func (h Handler) SetRoutes(g *echo.Group) {
 
 	chat := withAuth.Group("/chats")
 	chat.POST("/:id", h.ChatWithOtherUser)
+	chat.GET("/:id", h.GetChatMessages)
 
 }

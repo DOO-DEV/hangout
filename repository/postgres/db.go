@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"time"
 )
@@ -36,4 +38,30 @@ func New(cfg Config) *PgDB {
 	db.SetMaxIdleConns(10)
 
 	return &PgDB{config: cfg, db: db}
+}
+
+func (d *PgDB) IsDuplicateKeyError(err error) bool {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return true
+	}
+
+	return false
+}
+
+func (d *PgDB) IsEmptyRowError(err error) bool {
+	if errors.Is(err, sql.ErrNoRows) {
+		return true
+	}
+
+	return false
+}
+
+func (d *PgDB) IsForeignKeyError(err error) bool {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		return true
+	}
+
+	return false
 }

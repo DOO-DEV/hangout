@@ -31,3 +31,20 @@ func (h Handler) ChatWithOtherUser(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) GetChatMessages(c echo.Context) error {
+	userIDToChatWith := c.Param("id")
+	if userIDToChatWith == "" {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+
+	res, err := h.chatSvc.GetChatHistory(c.Request().Context(), param.GetChatHistoryRequest{}, claims.ID, userIDToChatWith)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

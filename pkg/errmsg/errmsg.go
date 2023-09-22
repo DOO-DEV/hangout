@@ -13,4 +13,5 @@ const (
 	ErrorMsgSelfGroupConnect      = "group can't connect with itself"
 	ErrorMsgUserNotFound          = "user not found"
 	ErrorMsgUsersAreNotConnected  = "users are not in same group or connected groups"
+	ErrorMsgNoChatMessage         = "there is no chat messages"
 )

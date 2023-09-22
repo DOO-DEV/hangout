@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
 	"hangout/entity"
 	dbparam "hangout/param/pgdb"
 	"hangout/pkg/errmsg"
@@ -95,7 +94,7 @@ func (d DB) AddToPendingList(ctx context.Context, p entity.PendingList) error {
 	const op = "GroupRepository.AddToPendingList"
 
 	if _, err := d.conn.Conn().ExecContext(ctx, `insert into "pending_list"("user_id", "group_id") values ($1, $2)`, p.UserID, p.GroupId); err != nil {
-		if isDuplicateKeyError(err) {
+		if d.conn.IsDuplicateKeyError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgYouAlreadySendRequest)
 		}
 		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected)
@@ -131,7 +130,7 @@ func (d DB) GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, er
 	g := &entity.Group{}
 	row := d.conn.Conn().QueryRowContext(ctx, `select "id" from "groups" where "owner_id" = $1`, userID)
 	if err := row.Scan(&g.ID); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			fmt.Println(err, userID)
 			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindForbidden).WithMessage(errmsg.ErrorMsgUserNotAllowed)
 		}
@@ -156,7 +155,7 @@ func (d DB) ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]
 		p := entity.PendingList{}
 		err := rows.Scan(&p.UserID, &p.GroupId, &p.SentAt, &p.Active)
 		if err != nil {
-			if isEmptyRowError(err) {
+			if d.conn.IsEmptyRowError(err) {
 				return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
 			}
 			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -175,7 +174,7 @@ func (d DB) MoveFromPendingListToGroup(ctx context.Context, groupID string, user
 	p := entity.PendingList{}
 	row := d.conn.Conn().QueryRowContext(ctx, `select * from "pending_list" where "user_id" = $1 and "group_id" = $2`, userID, groupID)
 	if err := row.Scan(&p.UserID, &p.GroupId, &p.SentAt, &p.Active); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
 		}
 		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgCantScanQueryResult)
@@ -216,10 +215,10 @@ func (d DB) ConnectGroups(ctx context.Context, g1, g2 string) error {
 
 	_, err := d.conn.Conn().ExecContext(ctx, `insert into "groups_connections"("from", "to") values ($1, $2)`, g1, g2)
 	if err != nil {
-		if isForeignKeyError(err) {
+		if d.conn.IsForeignKeyError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgGroupNotFound)
 		}
-		if isDuplicateKeyError(err) {
+		if d.conn.IsDuplicateKeyError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgByDirectional)
 		}
 		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -240,7 +239,7 @@ func (d DB) ListMyGroupConnections(ctx context.Context, groupID string) ([]dbpar
 	for rows.Next() {
 		g := dbparam.GroupConnection{}
 		if err := rows.Scan(&g.From, &g.CreatedAt); err != nil {
-			if isEmptyRowError(err) {
+			if d.conn.IsEmptyRowError(err) {
 				return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
 			}
 			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -260,7 +259,7 @@ func (d DB) AcceptGroupConnection(ctx context.Context, from, to string) error {
 	row := d.conn.Conn().QueryRowContext(ctx, `update "groups_connections" set "accept" = 'true' where "from" = $1 and "to" = $2 returning "accept"`, from, to)
 	var accept bool
 	if err := row.Scan(&accept); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgGroupNotFound)
 		}
 		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -275,7 +274,7 @@ func (d DB) CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, 
 	row := d.conn.Conn().QueryRowContext(ctx, `select "group_id" from "users_group" where "user_id" = $1`, u1)
 	g1 := entity.Group{}
 	if err := row.Scan(&g1.ID); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUserNotFound)
 		}
 		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -284,7 +283,7 @@ func (d DB) CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, 
 	row = d.conn.Conn().QueryRowContext(ctx, `select "group_id" from "users_group" where "user_id" = $1`, u2)
 	g2 := entity.Group{}
 	if err := row.Scan(&g2.ID); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUserNotFound)
 		}
 		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
@@ -293,37 +292,11 @@ func (d DB) CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, 
 	row = d.conn.Conn().QueryRowContext(ctx, `select "accept" from "groups_connections" where (("from"= $1 and "to"= $2) or ("from" = $3 and "to" = $4) and "accept" = 'true')`, g1.ID, g2.ID, g2.ID, g1.ID)
 	var accept bool
 	if err := row.Scan(&accept); err != nil {
-		if isEmptyRowError(err) {
+		if d.conn.IsEmptyRowError(err) {
 			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUsersAreNotConnected)
 		}
 		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
 
 	return accept, nil
-}
-
-func isDuplicateKeyError(err error) bool {
-	var pgErr *pq.Error
-	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-		return true
-	}
-
-	return false
-}
-
-func isEmptyRowError(err error) bool {
-	if errors.Is(err, sql.ErrNoRows) {
-		return true
-	}
-
-	return false
-}
-
-func isForeignKeyError(err error) bool {
-	var pgErr *pq.Error
-	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
-		return true
-	}
-
-	return false
 }
