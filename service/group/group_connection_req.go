@@ -2,7 +2,9 @@ package groupservice
 
 import (
 	"context"
+	"errors"
 	param "hangout/param/http"
+	"hangout/pkg/errmsg"
 	"hangout/pkg/richerror"
 )
 
@@ -14,6 +16,11 @@ func (s Service) GroupConnectionRequest(ctx context.Context, req param.GroupConn
 	gr, err := s.repo.GetOwnedGroup(ctx, adminID)
 	if gr == nil {
 		return nil, richerror.New(op).WithError(err)
+	}
+	// can't connect with own groups
+	if gr.ID == req.GroupID {
+		wErr := richerror.New(op).WithError(errors.New("")).WithMessage(errmsg.ErrorMsgSelfGroupConnect)
+		return nil, richerror.New(op).WithError(wErr).WithKind(richerror.KindInvalid)
 	}
 
 	if err := s.repo.ConnectGroups(ctx, gr.ID, req.GroupID); err != nil {

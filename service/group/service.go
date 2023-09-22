@@ -3,6 +3,7 @@ package groupservice
 import (
 	"context"
 	"hangout/entity"
+	dbparam "hangout/param/pgdb"
 )
 
 type Repository interface {
@@ -16,6 +17,7 @@ type Repository interface {
 	ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error)
 	MoveFromPendingListToGroup(ctx context.Context, groupID string, userID string) error
 	ConnectGroups(ctx context.Context, g1, g2 string) error
+	ListMyGroupConnections(ctx context.Context, groupID string) ([]dbparam.GroupConnection, error)
 }
 
 type Service struct {

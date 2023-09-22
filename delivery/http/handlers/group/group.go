@@ -138,3 +138,14 @@ func (h Handler) ConnectGroups(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, res)
 }
+
+func (h Handler) ListMyGroupConnections(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+
+	res, err := h.groupSvc.ListMyGroupConnections(c.Request().Context(), param.MyGroupConnectionsRequest{}, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+	return c.JSON(http.StatusOK, res)
+}

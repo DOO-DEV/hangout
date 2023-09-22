@@ -6,10 +6,11 @@ CREATE TABLE IF NOT EXISTS "groups_connections" (
   "created_at" TIMESTAMP DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX unique_group_connection ON
-"groups_connections" (LEAST("id"::TEXT, "from"::TEXT), GREATEST("id"::TEXT, "from"::TEXT));
+CREATE UNIQUE INDEX "dup_group_conn_1" ON "groups_connections" (LEAST("from", "to"));
+CREATE UNIQUE INDEX "dup_group_conn_2" ON "groups_connections" (GREATEST("from", "to"));
 
 
 -- +migrate Down
 DROP TABLE IF EXISTS "groups_connections";
-DROP INDEX unique_group_connection;
+DROP INDEX "dup_group_conn_1" CASCADE;
+DROP INDEX "dup_group_conn_2" CASCADE;

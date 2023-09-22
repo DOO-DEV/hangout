@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	"hangout/entity"
+	dbparam "hangout/param/pgdb"
 	"hangout/pkg/errmsg"
 	"hangout/pkg/richerror"
 	"time"
@@ -131,6 +132,7 @@ func (d DB) GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, er
 	row := d.conn.Conn().QueryRowContext(ctx, `select "id" from "groups" where "owner_id" = $1`, userID)
 	if err := row.Scan(&g.ID); err != nil {
 		if isEmptyRowError(err) {
+			fmt.Println(err, userID)
 			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindForbidden).WithMessage(errmsg.ErrorMsgUserNotAllowed)
 		}
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgCantScanQueryResult)
@@ -214,7 +216,6 @@ func (d DB) ConnectGroups(ctx context.Context, g1, g2 string) error {
 
 	_, err := d.conn.Conn().ExecContext(ctx, `insert into "groups_connections"("from", "to") values ($1, $2)`, g1, g2)
 	if err != nil {
-		fmt.Println(err)
 		if isForeignKeyError(err) {
 			return richerror.New(op).WithError(err).WithKind(richerror.KindInvalid).WithMessage(errmsg.ErrorMsgGroupNotFound)
 		}
@@ -225,6 +226,32 @@ func (d DB) ConnectGroups(ctx context.Context, g1, g2 string) error {
 	}
 
 	return nil
+}
+
+func (d DB) ListMyGroupConnections(ctx context.Context, groupID string) ([]dbparam.GroupConnection, error) {
+	const op = "GroupRepository.ListMyGroupConnections"
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select "from", "created_at" from "groups_connections" where "to" = $1`, groupID)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	defer rows.Close()
+	list := make([]dbparam.GroupConnection, 0)
+	for rows.Next() {
+		g := dbparam.GroupConnection{}
+		if err := rows.Scan(&g.From, &g.CreatedAt); err != nil {
+			if isEmptyRowError(err) {
+				return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+			}
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+		}
+		list = append(list, g)
+	}
+	if rows.Err() != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return list, nil
 }
 
 func isDuplicateKeyError(err error) bool {

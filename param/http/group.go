@@ -1,6 +1,9 @@
 package param
 
-import "time"
+import (
+	dbparam "hangout/param/pgdb"
+	"time"
+)
 
 type CreateGroupRequest struct {
 	Name string `json:"name"`
@@ -77,4 +80,11 @@ type GroupConnectionRequest struct {
 }
 
 type GroupConnectionResponse struct {
+}
+
+type MyGroupConnectionsRequest struct {
+}
+
+type MyGroupConnectionsResponse struct {
+	Data []dbparam.GroupConnection `json:"data"`
 }
