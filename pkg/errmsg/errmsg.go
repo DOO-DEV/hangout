@@ -11,4 +11,6 @@ const (
 	ErrorMsgByDirectional         = "you have already a request from this group"
 	ErrorMsgGroupNotFound         = "group not found"
 	ErrorMsgSelfGroupConnect      = "group can't connect with itself"
+	ErrorMsgUserNotFound          = "user not found"
+	ErrorMsgUsersAreNotConnected  = "users are not in same group or connected groups"
 )

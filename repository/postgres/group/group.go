@@ -269,6 +269,39 @@ func (d DB) AcceptGroupConnection(ctx context.Context, from, to string) error {
 	return nil
 }
 
+func (d DB) CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, error) {
+	const op = "GroupRepository.CheckUserGroupConnection"
+
+	row := d.conn.Conn().QueryRowContext(ctx, `select "group_id" from "users_group" where "user_id" = $1`, u1)
+	g1 := entity.Group{}
+	if err := row.Scan(&g1.ID); err != nil {
+		if isEmptyRowError(err) {
+			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUserNotFound)
+		}
+		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	row = d.conn.Conn().QueryRowContext(ctx, `select "group_id" from "users_group" where "user_id" = $1`, u2)
+	g2 := entity.Group{}
+	if err := row.Scan(&g2.ID); err != nil {
+		if isEmptyRowError(err) {
+			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUserNotFound)
+		}
+		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	row = d.conn.Conn().QueryRowContext(ctx, `select "accept" from "groups_connections" where (("from"= $1 and "to"= $2) or ("from" = $3 and "to" = $4) and "accept" = 'true')`, g1.ID, g2.ID, g2.ID, g1.ID)
+	var accept bool
+	if err := row.Scan(&accept); err != nil {
+		if isEmptyRowError(err) {
+			return false, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgUsersAreNotConnected)
+		}
+		return false, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return accept, nil
+}
+
 func isDuplicateKeyError(err error) bool {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {

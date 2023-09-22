@@ -19,6 +19,7 @@ type Repository interface {
 	ConnectGroups(ctx context.Context, g1, g2 string) error
 	ListMyGroupConnections(ctx context.Context, groupID string) ([]dbparam.GroupConnection, error)
 	AcceptGroupConnection(ctx context.Context, from, to string) error
+	CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, error)
 }
 
 type Service struct {

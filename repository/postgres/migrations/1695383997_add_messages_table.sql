@@ -1,7 +1,8 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS "messages" (
-    "sender" TEXT,
-    "receiver" TEXT,
+    "id" SERIAL PRIMARY KEY,
+    "sender" TEXT REFERENCES "users"("id"),
+    "receiver" TEXT REFERENCES "users"("id"),
     "content" TEXT,
     "type" TEXT,
     "timestamp" TIMESTAMP DEFAULT NOW()

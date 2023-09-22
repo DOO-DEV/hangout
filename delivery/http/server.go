@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	chathandler "hangout/delivery/http/handlers/chat"
 	grouphandler "hangout/delivery/http/handlers/group"
 	"hangout/delivery/http/handlers/health_check"
 	user_handler "hangout/delivery/http/handlers/user"
 	"hangout/pkg/constants"
 	authservice "hangout/service/auth"
+	chatservice "hangout/service/chat"
 	groupservice "hangout/service/group"
 	userservice "hangout/service/user"
+	"hangout/validator/chatvalidator"
 	"hangout/validator/groupvalidator"
 	"hangout/validator/uservalidator"
 )
@@ -25,15 +28,25 @@ type Server struct {
 	healthCheckHandler health_check.Handler
 	userHandler        user_handler.Handler
 	groupHandler       grouphandler.Handler
+	chatHandler        chathandler.Handler
 }
 
-func New(httpCfg Config, userValidator uservalidator.Validator, userSvc userservice.Service, groupSvc groupservice.Service, gValidator groupvalidator.Validator, authSvc authservice.Service, authCfg authservice.Config) Server {
+func New(httpCfg Config,
+	userValidator uservalidator.Validator,
+	userSvc userservice.Service,
+	groupSvc groupservice.Service,
+	gValidator groupvalidator.Validator,
+	authSvc authservice.Service,
+	authCfg authservice.Config,
+	chatValidator chatvalidator.Validator,
+	chatSvc chatservice.Service) Server {
 	return Server{
 		config:             httpCfg,
 		router:             echo.New(),
 		healthCheckHandler: health_check.New(),
 		userHandler:        user_handler.New(userValidator, userSvc),
 		groupHandler:       grouphandler.New(gValidator, groupSvc, authCfg, authSvc),
+		chatHandler:        chathandler.New(chatValidator, authSvc, authCfg, chatSvc),
 	}
 }
 
@@ -49,6 +62,7 @@ func (s Server) Serve() {
 	s.healthCheckHandler.SetRoutes(g)
 	s.userHandler.SetRoutes(g)
 	s.groupHandler.SetRoutes(g)
+	s.chatHandler.SetRoutes(g)
 
 	port := fmt.Sprintf(":%s", s.config.Port)
 	s.router.Start(port)

@@ -1,1 +1,8 @@
 package chatvalidator
+
+type Validator struct {
+}
+
+func New() Validator {
+	return Validator{}
+}
