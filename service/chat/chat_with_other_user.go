@@ -11,11 +11,7 @@ import (
 
 func (s Service) ChatWithOtherUser(ctx context.Context, req param.ChatMessageRequest, sender, receiver string) (*param.ChatMessageResponse, error) {
 	const op = "ChatService.ChatWithOtherUser"
-
-	// user can chat with user in two case:
-	// 1- they are in same group (groupIDUser1 == groupIDUser2)
-	// 2- they group are connected before (accept is true)
-	// then add message to storage
+	// TODO - its better to have a chat table. first check the chat is exist and then save message to message table with their chatID
 
 	isConnect, err := s.groupRepo.CheckUserGroupConnection(ctx, sender, receiver)
 	if !isConnect {
