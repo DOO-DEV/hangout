@@ -149,3 +149,24 @@ func (h Handler) ListMyGroupConnections(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h Handler) AcceptGroupConnection(c echo.Context) error {
+	var req param.AcceptGroupConnectionRequest
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.validator.ValidateAcceptGroupConnection(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authConfig)
+	res, err := h.groupSvc.AcceptGroupConnectionToMyGroup(c.Request().Context(), req, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

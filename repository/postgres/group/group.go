@@ -254,6 +254,21 @@ func (d DB) ListMyGroupConnections(ctx context.Context, groupID string) ([]dbpar
 	return list, nil
 }
 
+func (d DB) AcceptGroupConnection(ctx context.Context, from, to string) error {
+	const op = "GroupRepository.AcceptGroupConnection"
+
+	row := d.conn.Conn().QueryRowContext(ctx, `update "groups_connections" set "accept" = 'true' where "from" = $1 and "to" = $2 returning "accept"`, from, to)
+	var accept bool
+	if err := row.Scan(&accept); err != nil {
+		if isEmptyRowError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgGroupNotFound)
+		}
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
+}
+
 func isDuplicateKeyError(err error) bool {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {

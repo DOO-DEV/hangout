@@ -21,4 +21,5 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	conReq := g.Group("/connection_requests", authmiddleware.Auth(h.authSvc, h.authConfig))
 	conReq.POST("", h.ConnectGroups)
 	conReq.GET("", h.ListMyGroupConnections)
+	conReq.POST("/accept", h.AcceptGroupConnection)
 }

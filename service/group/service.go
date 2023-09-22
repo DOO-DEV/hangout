@@ -18,6 +18,7 @@ type Repository interface {
 	MoveFromPendingListToGroup(ctx context.Context, groupID string, userID string) error
 	ConnectGroups(ctx context.Context, g1, g2 string) error
 	ListMyGroupConnections(ctx context.Context, groupID string) ([]dbparam.GroupConnection, error)
+	AcceptGroupConnection(ctx context.Context, from, to string) error
 }
 
 type Service struct {

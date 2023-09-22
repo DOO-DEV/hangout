@@ -88,3 +88,10 @@ type MyGroupConnectionsRequest struct {
 type MyGroupConnectionsResponse struct {
 	Data []dbparam.GroupConnection `json:"data"`
 }
+
+type AcceptGroupConnectionRequest struct {
+	GroupID string `json:"group_id"`
+}
+
+type AcceptGroupConnectionResponse struct {
+}
