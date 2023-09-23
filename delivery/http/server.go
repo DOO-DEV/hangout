@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	chathandler "hangout/delivery/http/handlers/chat"
 	grouphandler "hangout/delivery/http/handlers/group"
 	"hangout/delivery/http/handlers/health_check"
@@ -59,6 +60,7 @@ func (s Server) Serve() {
 	g := s.router.Group(constants.ApiEndpoint)
 
 	// Set up routes
+	s.router.GET("/swagger/*", echoSwagger.WrapHandler)
 	s.healthCheckHandler.SetRoutes(g)
 	s.userHandler.SetRoutes(g)
 	s.groupHandler.SetRoutes(g)

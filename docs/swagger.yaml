@@ -1,0 +1,31 @@
+info:
+  contact: {}
+paths:
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided information
+      parameters:
+      - description: User's name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: User's email address
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: User's password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Register a new user
+      tags:
+      - Authentication
+swagger: "2.0"

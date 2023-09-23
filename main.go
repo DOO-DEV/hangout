@@ -12,6 +12,7 @@ import (
 	"hangout/validator/chatvalidator"
 	"hangout/validator/groupvalidator"
 
+	_ "github.com/swaggo/echo-swagger/example/docs"
 	authservice "hangout/service/auth"
 	userservice "hangout/service/user"
 	"hangout/validator/uservalidator"

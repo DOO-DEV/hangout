@@ -7,6 +7,16 @@ import (
 	"net/http"
 )
 
+// Register godoc
+//
+//	@Summary		Register account
+//	@Description	Create a new account for new user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		param.RegisterRequest	true	"Create User"
+//	@Success		201		{object}	param.RegisterResponse
+//	@Router			/signup [post]
 func (h Handler) Register(c echo.Context) error {
 	var req param.RegisterRequest
 
