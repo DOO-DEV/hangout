@@ -13,6 +13,12 @@ func (s Service) ChatWithOtherUser(ctx context.Context, req param.ChatMessageReq
 	const op = "ChatService.ChatWithOtherUser"
 	// TODO - its better to have a chat table. first check the chat is exist and then save message to message table with their chatID
 
+	// check the existence of sender and receiver
+	// check connectivity of the users (for now. it will remove when policy change)
+	// check the chat existence
+	// if exist take chatID. if not create a chat and send back the ID
+	// send message into messages table with chatID.
+
 	isConnect, err := s.groupRepo.CheckUserGroupConnection(ctx, sender, receiver)
 	if !isConnect {
 		if err != nil {
