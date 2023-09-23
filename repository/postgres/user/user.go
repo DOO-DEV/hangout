@@ -52,3 +52,19 @@ func (d *DB) GetUserByUsername(ctx context.Context, username string) (*entity.Us
 
 	return u, nil
 }
+
+func (d *DB) GetUserByID(ctx context.Context, userID string) (*entity.User, error) {
+	const op = "UserRepository.GetUserById"
+
+	res := d.conn.Conn().QueryRowContext(ctx, `select * from users where "id" = $1`, userID)
+	u := &entity.User{}
+
+	if err := res.Scan(&u.ID, &u.FirsName, &u.LastName, &u.Password, &u.Username, &u.CreatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, richerror.New(op).WithKind(richerror.KindNotFound).WithError(err).WithMessage("user not found")
+		}
+		return nil, richerror.New(op).WithKind(richerror.KindUnexpected).WithError(err).WithMessage("something went wrong")
+	}
+
+	return u, nil
+}

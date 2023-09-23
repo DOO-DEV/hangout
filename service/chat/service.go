@@ -3,13 +3,18 @@ package chatservice
 import (
 	"context"
 	"hangout/entity"
-	dbparam "hangout/param/pgdb"
 )
 
+type userRepository interface {
+	GetUserByID(ctx context.Context, userID string) (*entity.User, error)
+}
+
 type chatRepository interface {
+	GetUserChatList(ctx context.Context, userID string) ([]entity.Chat, error)
+	GetChatMessages(ctx context.Context, chatID string) ([]entity.Message, error)
 	SaveMessage(ctx context.Context, m entity.Message) error
-	GetChatMessages(ctx context.Context, sender, receiver string) ([]entity.Message, error)
-	GetUserChatList(ctx context.Context, userID string) ([]dbparam.Chat, error)
+	CreateChat(ctx context.Context, c *entity.Chat) (*entity.Chat, error)
+	GetChatByUsersIds(ctx context.Context, u1, u2 string) (*entity.Chat, error)
 }
 
 type groupRepository interface {
@@ -19,11 +24,13 @@ type groupRepository interface {
 type Service struct {
 	chatRepo  chatRepository
 	groupRepo groupRepository
+	userRepo  userRepository
 }
 
-func New(chRepo chatRepository, gRepo groupRepository) Service {
+func New(chRepo chatRepository, gRepo groupRepository, uRepo userRepository) Service {
 	return Service{
 		chatRepo:  chRepo,
 		groupRepo: gRepo,
+		userRepo:  uRepo,
 	}
 }

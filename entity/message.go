@@ -10,8 +10,7 @@ const (
 
 type Message struct {
 	ID        string
-	Sender    string
-	Receiver  string
+	ChatID    string
 	Content   string
 	Type      MsgType
 	Timestamp time.Time

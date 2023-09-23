@@ -1,7 +1,6 @@
 package param
 
 import (
-	dbparam "hangout/param/pgdb"
 	"time"
 )
 
@@ -30,5 +29,5 @@ type GetUserChatsRequest struct {
 }
 
 type GetUserChatResponse struct {
-	Data []dbparam.Chat `json:"data"`
+	Data []string `json:"data"`
 }

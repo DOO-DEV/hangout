@@ -6,7 +6,7 @@ import (
 	"hangout/pkg/richerror"
 )
 
-func (s Service) ListUserChats(ctx context.Context, req param.GetUserChatsRequest, userID string) (*param.GetUserChatResponse, error) {
+func (s Service) ListUserChats(ctx context.Context, _ param.GetUserChatsRequest, userID string) (*param.GetUserChatResponse, error) {
 	const op = "ChatService.LIstUserChats"
 
 	list, err := s.chatRepo.GetUserChatList(ctx, userID)
@@ -14,5 +14,9 @@ func (s Service) ListUserChats(ctx context.Context, req param.GetUserChatsReques
 		return nil, richerror.New(op).WithError(err)
 	}
 
-	return &param.GetUserChatResponse{Data: list}, nil
+	chatIDs := make([]string, 0)
+	for _, v := range list {
+		chatIDs = append(chatIDs, v.ID)
+	}
+	return &param.GetUserChatResponse{Data: chatIDs}, nil
 }

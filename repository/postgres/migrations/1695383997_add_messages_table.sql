@@ -1,9 +1,7 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS "messages" (
     "id" SERIAL PRIMARY KEY,
-    "chat_id" TEXT REFERENCES "chats"("id") UNIQUE,
-    "sender" TEXT REFERENCES "users"("id"),
-    "receiver" TEXT REFERENCES "users"("id"),
+    "chat_id" TEXT REFERENCES "chats"("id"),
     "content" TEXT,
     "type" TEXT,
     "timestamp" TIMESTAMP DEFAULT NOW()

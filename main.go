@@ -59,7 +59,7 @@ func setupServices(cfg *config.Config) *services {
 	groupValidator := groupvalidator.New()
 
 	chatRepo := pgchat.New(pgDB)
-	chatSvc := chatservice.New(chatRepo, groupRepo)
+	chatSvc := chatservice.New(chatRepo, groupRepo, userRepo)
 	chatValidator := chatvalidator.New()
 	return &services{
 		userValidator:  userValidator,
