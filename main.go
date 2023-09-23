@@ -12,7 +12,7 @@ import (
 	"hangout/validator/chatvalidator"
 	"hangout/validator/groupvalidator"
 
-	_ "github.com/swaggo/echo-swagger/example/docs"
+	_ "hangout/docs"
 	authservice "hangout/service/auth"
 	userservice "hangout/service/user"
 	"hangout/validator/uservalidator"
@@ -28,6 +28,21 @@ type services struct {
 	chatValidator  chatvalidator.Validator
 }
 
+//	@title					Hangout
+//	@version				1.1
+//	@description			The HTTP documentation for Hangout API
+//	@termsOfService			http://swagger.io/terms/
+//	@license.name			Apache 2.0
+//	@schemes				http
+//	@host					localhost:3000
+//	@BasePath				/api/v1
+//	@securityDefinitions	bearerAuth
+//	@in						header
+//	@name					Authorization
+//	@description			Enter the token with the `Bearer ` prefix, e.g. `Bearer jwt_token_string`.
+//	@in						header
+//	@name					Authorization
+//	@description			Enter the token with the `Bearer ` prefix, e.g. `Bearer jwt_token_string`.
 func main() {
 	cfg := config.Load()
 

@@ -1,12 +1,29 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Enter the token with the `Bearer ` prefix, e.g. `Bearer jwt_token_string`.",
+        "title": "Hangout",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0"
+        },
+        "version": "1.1"
     },
+    "host": "localhost:3000",
+    "basePath": "/api/v1",
     "paths": {
-        "/register": {
-            "post": {
-                "description": "Register a new user with the provided information",
+        "/connection_requests": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Admins can see list of all other groups that connect with its group",
                 "consumes": [
                     "application/json"
                 ],
@@ -14,34 +31,521 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Authentication"
+                    "group"
                 ],
-                "summary": "Register a new user",
+                "summary": "List all group connections",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "User's name",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's email address",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's password",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "List connections",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.MyGroupConnectionsRequest"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.MyGroupConnectionsResponse"
+                        }
+                    }
+                }
             }
+        },
+        "/connection_requests/accept": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Admins can accept request from other group to join with its group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Accept group connection request",
+                "parameters": [
+                    {
+                        "description": "Accept group connections",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.AcceptGroupConnectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.AcceptGroupConnectionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can list all existence group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Show all group",
+                "parameters": [
+                    {
+                        "description": "List Groups",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.GetMyGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetMyGroupResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Create a group for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Create a group",
+                "parameters": [
+                    {
+                        "description": "Create group",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.CreateGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.CreteGroupResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/my": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Get created group info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Get my group",
+                "parameters": [
+                    {
+                        "description": "My Group Info",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.GetMyGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetMyGroupResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/join_requests": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Admin can see list of join requests to it's group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "List admin join requests",
+                "parameters": [
+                    {
+                        "description": "Accept",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.ListJoinRequestsToMyGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.ListJoinRequestsToMyGroupResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can join a group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Join group",
+                "parameters": [
+                    {
+                        "description": "Join to group",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.JoinRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "2001": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/param.JoinResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Login to user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login account",
+                "parameters": [
+                    {
+                        "description": "Login User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.LoginResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Create a new account for new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register account",
+                "parameters": [
+                    {
+                        "description": "Create User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.RegisterResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dbparam.GroupConnection": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.AcceptGroupConnectionRequest": {
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.AcceptGroupConnectionResponse": {
+            "type": "object"
+        },
+        "param.CreateGroupRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.CreteGroupResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.GetMyGroupRequest": {
+            "type": "object"
+        },
+        "param.GetMyGroupResponse": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/param.MemberInfo"
+                    }
+                }
+            }
+        },
+        "param.JoinRequest": {
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.JoinResponse": {
+            "type": "object"
+        },
+        "param.ListJoinRequest": {
+            "type": "object"
+        },
+        "param.ListJoinRequestsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/param.PendingJoinReq"
+                    }
+                }
+            }
+        },
+        "param.ListJoinRequestsToMyGroupRequest": {
+            "type": "object"
+        },
+        "param.ListJoinRequestsToMyGroupResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/param.MemberRequestToMyGroup"
+                    }
+                }
+            }
+        },
+        "param.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.MemberInfo": {
+            "type": "object",
+            "properties": {
+                "joined_at": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.MemberRequestToMyGroup": {
+            "type": "object",
+            "properties": {
+                "sent_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.MyGroupConnectionsRequest": {
+            "type": "object"
+        },
+        "param.MyGroupConnectionsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dbparam.GroupConnection"
+                    }
+                }
+            }
+        },
+        "param.PendingJoinReq": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "sent_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.RegisterResponse": {
+            "type": "object"
         }
     }
 }

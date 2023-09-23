@@ -37,6 +37,16 @@ func (h Handler) Register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, res)
 }
 
+// Login godoc
+//
+//	@Summary		Login account
+//	@Description	Login to user account
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		param.LoginRequest	true	"Login User"
+//	@Success		201		{object}	param.LoginResponse
+//	@Router			/login [post]
 func (h Handler) Login(c echo.Context) error {
 	var req param.LoginRequest
 

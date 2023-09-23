@@ -1,31 +1,348 @@
+basePath: /api/v1
+definitions:
+  dbparam.GroupConnection:
+    properties:
+      created_at:
+        type: string
+      from:
+        type: string
+    type: object
+  param.AcceptGroupConnectionRequest:
+    properties:
+      group_id:
+        type: string
+    type: object
+  param.AcceptGroupConnectionResponse:
+    type: object
+  param.CreateGroupRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  param.CreteGroupResponse:
+    properties:
+      name:
+        type: string
+    type: object
+  param.GetMyGroupRequest:
+    type: object
+  param.GetMyGroupResponse:
+    properties:
+      group:
+        type: string
+      members:
+        items:
+          $ref: '#/definitions/param.MemberInfo'
+        type: array
+    type: object
+  param.JoinRequest:
+    properties:
+      group_id:
+        type: string
+    type: object
+  param.JoinResponse:
+    type: object
+  param.ListJoinRequest:
+    type: object
+  param.ListJoinRequestsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/param.PendingJoinReq'
+        type: array
+    type: object
+  param.ListJoinRequestsToMyGroupRequest:
+    type: object
+  param.ListJoinRequestsToMyGroupResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/param.MemberRequestToMyGroup'
+        type: array
+    type: object
+  param.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  param.LoginResponse:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  param.MemberInfo:
+    properties:
+      joined_at:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  param.MemberRequestToMyGroup:
+    properties:
+      sent_at:
+        type: string
+      user:
+        type: string
+    type: object
+  param.MyGroupConnectionsRequest:
+    type: object
+  param.MyGroupConnectionsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dbparam.GroupConnection'
+        type: array
+    type: object
+  param.PendingJoinReq:
+    properties:
+      group:
+        type: string
+      sent_at:
+        type: string
+    type: object
+  param.RegisterRequest:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  param.RegisterResponse:
+    type: object
+host: localhost:3000
 info:
   contact: {}
+  description: Enter the token with the `Bearer ` prefix, e.g. `Bearer jwt_token_string`.
+  license:
+    name: Apache 2.0
+  termsOfService: http://swagger.io/terms/
+  title: Hangout
+  version: "1.1"
 paths:
-  /register:
+  /connection_requests:
+    get:
+      consumes:
+      - application/json
+      description: Admins can see list of all other groups that connect with its group
+      parameters:
+      - description: List connections
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.MyGroupConnectionsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.MyGroupConnectionsResponse'
+      security:
+      - auth: []
+      summary: List all group connections
+      tags:
+      - group
+  /connection_requests/accept:
+    get:
+      consumes:
+      - application/json
+      description: Admins can accept request from other group to join with its group
+      parameters:
+      - description: Accept group connections
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.AcceptGroupConnectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.AcceptGroupConnectionResponse'
+      security:
+      - auth: []
+      summary: Accept group connection request
+      tags:
+      - group
+  /groups:
+    get:
+      consumes:
+      - application/json
+      description: User can list all existence group
+      parameters:
+      - description: List Groups
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.GetMyGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.GetMyGroupResponse'
+      security:
+      - auth: []
+      summary: Show all group
+      tags:
+      - group
     post:
       consumes:
       - application/json
-      description: Register a new user with the provided information
+      description: Create a group for a user
       parameters:
-      - description: User's name
-        in: formData
-        name: name
+      - description: Create group
+        in: body
+        name: user
         required: true
-        type: string
-      - description: User's email address
-        in: formData
-        name: email
-        required: true
-        type: string
-      - description: User's password
-        in: formData
-        name: password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/param.CreateGroupRequest'
       produces:
       - application/json
-      responses: {}
-      summary: Register a new user
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.CreteGroupResponse'
+      security:
+      - auth: []
+      summary: Create a group
       tags:
-      - Authentication
+      - group
+  /groups/my:
+    get:
+      consumes:
+      - application/json
+      description: Get created group info
+      parameters:
+      - description: My Group Info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.GetMyGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.GetMyGroupResponse'
+      security:
+      - auth: []
+      summary: Get my group
+      tags:
+      - group
+  /join_requests:
+    get:
+      consumes:
+      - application/json
+      description: Admin can see list of join requests to it's group
+      parameters:
+      - description: Accept
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.ListJoinRequestsToMyGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.ListJoinRequestsToMyGroupResponse'
+      security:
+      - auth: []
+      summary: List admin join requests
+      tags:
+      - group
+    post:
+      consumes:
+      - application/json
+      description: User can join a group
+      parameters:
+      - description: Join to group
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.JoinRequest'
+      produces:
+      - application/json
+      responses:
+        "2001":
+          description: ""
+          schema:
+            $ref: '#/definitions/param.JoinResponse'
+      security:
+      - auth: []
+      summary: Join group
+      tags:
+      - group
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login to user account
+      parameters:
+      - description: Login User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.LoginResponse'
+      summary: Login account
+      tags:
+      - auth
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new account for new user
+      parameters:
+      - description: Create User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.RegisterResponse'
+      summary: Register account
+      tags:
+      - auth
+schemes:
+- http
 swagger: "2.0"
