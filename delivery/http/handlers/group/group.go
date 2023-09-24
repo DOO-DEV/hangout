@@ -206,7 +206,6 @@ func (h Handler) AcceptJoin(c echo.Context) error {
 //	@Param			user	body		param.GroupConnectionRequest	true	"Connect group"
 //	@Success		201		{object}	param.GroupConnectionResponse
 //	@Router			/connection_requests [post]
-
 func (h Handler) ConnectGroups(c echo.Context) error {
 	var req param.GroupConnectionRequest
 

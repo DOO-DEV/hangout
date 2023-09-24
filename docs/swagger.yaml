@@ -14,6 +14,20 @@ definitions:
     type: object
   param.AcceptGroupConnectionResponse:
     type: object
+  param.ChatMessageRequest:
+    properties:
+      content:
+        type: string
+    type: object
+  param.ChatMessageResponse:
+    type: object
+  param.ChatMsg:
+    properties:
+      content:
+        type: string
+      timestamp:
+        type: string
+    type: object
   param.CreateGroupRequest:
     properties:
       name:
@@ -22,6 +36,19 @@ definitions:
   param.CreteGroupResponse:
     properties:
       name:
+        type: string
+    type: object
+  param.GetChatHistoryRequest:
+    type: object
+  param.GetChatHistoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/param.ChatMsg'
+        type: array
+      receiver:
+        type: string
+      sender:
         type: string
     type: object
   param.GetMyGroupRequest:
@@ -34,6 +61,22 @@ definitions:
         items:
           $ref: '#/definitions/param.MemberInfo'
         type: array
+    type: object
+  param.GetUserChatResponse:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+    type: object
+  param.GetUserChatsRequest:
+    type: object
+  param.GroupConnectionRequest:
+    properties:
+      group_id:
+        type: string
+    type: object
+  param.GroupConnectionResponse:
     type: object
   param.JoinRequest:
     properties:
@@ -133,6 +176,55 @@ info:
   title: Hangout
   version: "1.1"
 paths:
+  /chat:
+    get:
+      consumes:
+      - application/json
+      description: List all user chats
+      parameters:
+      - description: Chat message
+        in: body
+        name: chat
+        schema:
+          $ref: '#/definitions/param.GetUserChatsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.GetUserChatResponse'
+      security:
+      - auth: []
+      tags:
+      - chat
+    post:
+      consumes:
+      - application/json
+      description: Chat with other users
+      parameters:
+      - description: user id to chat with
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Chat message
+        in: body
+        name: chat
+        required: true
+        schema:
+          $ref: '#/definitions/param.ChatMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.ChatMessageResponse'
+      security:
+      - auth: []
+      tags:
+      - chat
   /connection_requests:
     get:
       consumes:
@@ -155,6 +247,29 @@ paths:
       security:
       - auth: []
       summary: List all group connections
+      tags:
+      - group
+    post:
+      consumes:
+      - application/json
+      description: Admins can request to each other to connect their groups
+      parameters:
+      - description: Connect group
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/param.GroupConnectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.GroupConnectionResponse'
+      security:
+      - auth: []
+      summary: Connect groups
       tags:
       - group
   /connection_requests/accept:

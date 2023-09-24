@@ -16,6 +16,86 @@
     "host": "localhost:3000",
     "basePath": "/api/v1",
     "paths": {
+        "/chat": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "List all user chats",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "description": "Chat message",
+                        "name": "chat",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetUserChatsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetUserChatResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Chat with other users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id to chat with",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Chat message",
+                        "name": "chat",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.ChatMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.ChatMessageResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/connection_requests": {
             "get": {
                 "security": [
@@ -50,6 +130,43 @@
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/param.MyGroupConnectionsResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Admins can request to each other to connect their groups",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Connect groups",
+                "parameters": [
+                    {
+                        "description": "Connect group",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.GroupConnectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.GroupConnectionResponse"
                         }
                     }
                 }
@@ -377,6 +494,28 @@
         "param.AcceptGroupConnectionResponse": {
             "type": "object"
         },
+        "param.ChatMessageRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.ChatMessageResponse": {
+            "type": "object"
+        },
+        "param.ChatMsg": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
         "param.CreateGroupRequest": {
             "type": "object",
             "properties": {
@@ -389,6 +528,26 @@
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.GetChatHistoryRequest": {
+            "type": "object"
+        },
+        "param.GetChatHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/param.ChatMsg"
+                    }
+                },
+                "receiver": {
+                    "type": "string"
+                },
+                "sender": {
                     "type": "string"
                 }
             }
@@ -409,6 +568,31 @@
                     }
                 }
             }
+        },
+        "param.GetUserChatResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "param.GetUserChatsRequest": {
+            "type": "object"
+        },
+        "param.GroupConnectionRequest": {
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.GroupConnectionResponse": {
+            "type": "object"
         },
         "param.JoinRequest": {
             "type": "object",
