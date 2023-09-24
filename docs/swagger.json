@@ -33,6 +33,7 @@
                 "tags": [
                     "chat"
                 ],
+                "summary": "List chats",
                 "parameters": [
                     {
                         "description": "Chat message",
@@ -48,6 +49,51 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/param.GetUserChatResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "History of chat",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Get chat history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Chat message",
+                        "name": "chat",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetChatHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetChatHistoryResponse"
                         }
                     }
                 }
@@ -68,6 +114,7 @@
                 "tags": [
                     "chat"
                 ],
+                "summary": "Chat with users",
                 "parameters": [
                     {
                         "type": "string",
@@ -87,8 +134,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/param.ChatMessageResponse"
                         }

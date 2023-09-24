@@ -10,7 +10,7 @@ import (
 
 // ChatWithOtherUser godoc
 //
-//	@Summery		Chat with users
+//	@Summary		Chat with users
 //	@Description	Chat with other users
 //	@Security		auth
 //	@Tags			chat
@@ -18,8 +18,8 @@ import (
 //	@Produce		json
 //	@Param			id		path		string						true	"user id to chat with"
 //	@Param			chat	body		param.ChatMessageRequest	true	"Chat message"
-//	@Success		200		{object}	param.ChatMessageResponse
-//	@Router			/chat [post]
+//	@Success		201		{object}	param.ChatMessageResponse
+//	@Router			/chat/{id} [post]
 func (h Handler) ChatWithOtherUser(c echo.Context) error {
 	var req param.ChatMessageRequest
 	if err := c.Bind(&req); err != nil {
@@ -41,21 +41,21 @@ func (h Handler) ChatWithOtherUser(c echo.Context) error {
 		return echo.NewHTTPError(code, msg)
 	}
 
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusCreated, res)
 }
 
 // GetChatMessages godoc
 //
-//	@Summery		Get chat history
+//	@Summary		Get chat history
 //	@Description	History of chat
 //	@Security		auth
 //	@Tags			chat
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string						true	"user id to get chat history"
+//	@Param			id		path		int							true	"Account ID"
 //	@Param			chat	body		param.GetChatHistoryRequest	false	"Chat message"
 //	@Success		200		{object}	param.GetChatHistoryResponse
-//	@Router			/chat [get]
+//	@Router			/chat/{id} [get]
 func (h Handler) GetChatMessages(c echo.Context) error {
 	userIDToChatWith := c.Param("id")
 	if userIDToChatWith == "" {
@@ -75,7 +75,7 @@ func (h Handler) GetChatMessages(c echo.Context) error {
 
 // GetUserChats godoc
 //
-//	@Summery		List chats
+//	@Summary		List chats
 //	@Description	List all user chats
 //	@Security		auth
 //	@Tags			chat

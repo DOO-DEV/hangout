@@ -62,9 +62,9 @@ func (s Server) Serve() {
 	// Set up routes
 	s.router.GET("/swagger/*", echoSwagger.WrapHandler)
 	s.healthCheckHandler.SetRoutes(g)
-	s.userHandler.SetRoutes(g)
-	s.groupHandler.SetRoutes(g)
 	s.chatHandler.SetRoutes(g)
+	s.groupHandler.SetRoutes(g)
+	s.userHandler.SetRoutes(g)
 
 	port := fmt.Sprintf(":%s", s.config.Port)
 	s.router.Start(port)
