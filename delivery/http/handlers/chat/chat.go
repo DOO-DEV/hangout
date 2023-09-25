@@ -64,7 +64,8 @@ func (h Handler) GetChatMessages(c echo.Context) error {
 
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
 
-	res, err := h.chatSvc.GetChatHistory(c.Request().Context(), param.GetChatHistoryRequest{}, claims.ID, userIDToChatWith)
+	res, err := h.chatSvc.GetChatHistory(c.Request().Context(),
+		param.GetChatHistoryRequest{}, claims.ID, userIDToChatWith)
 	if err != nil {
 		code, msg := httperr.Error(err)
 		return echo.NewHTTPError(code, msg)
