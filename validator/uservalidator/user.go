@@ -26,6 +26,12 @@ func (v Validator) ValidateLoginRequest(req param.LoginRequest) error {
 	)
 }
 
+func (v Validator) ValidateDeleteProfileImageRequest(req param.DeleteProfileImage) error {
+	return validation.ValidateStruct(&req,
+		validation.Field(&req.ImageID, validation.Required),
+	)
+}
+
 func (v Validator) checkUserExists(value interface{}) error {
 	username := value.(string)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)

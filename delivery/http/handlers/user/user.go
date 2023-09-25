@@ -3,6 +3,8 @@ package user_handler
 import (
 	"github.com/labstack/echo/v4"
 	param "hangout/param/http"
+	"hangout/pkg/claims"
+	"hangout/pkg/constants"
 	"hangout/pkg/httperr"
 	"net/http"
 )
@@ -59,6 +61,74 @@ func (h Handler) Login(c echo.Context) error {
 	}
 
 	res, err := h.userSvc.Login(c.Request().Context(), req)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (h Handler) UploadProfileImage(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+	img, err := c.FormFile("image")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity)
+	}
+
+	if err := h.userSvc.SaveProfileImage(c.Request().Context(), img, claims.ID); err != nil {
+		return nil
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": constants.FileUploadedSuccess,
+	})
+}
+
+func (h Handler) GetPrimaryImage(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+	h.userSvc.GetPrimaryProfileImage(c.Request().Context(), claims.ID)
+	return nil
+}
+
+func (h Handler) GetAllProfileImages(c echo.Context) error {
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+	res, err := h.userSvc.GetAllProfileImages(c.Request().Context(), claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (h Handler) DeleteProfileImage(c echo.Context) error {
+	var req param.DeleteProfileImage
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if err := h.validator.ValidateDeleteProfileImageRequest(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+	res, err := h.userSvc.DeleteProfileImage(c.Request().Context(), req, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func (h Handler) SetImageAsPrimary(c echo.Context) error {
+	var req param.SetImageAsPrimaryRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
+	res, err := h.userSvc.SetImageAsPrimary(c.Request().Context(), req, claims.ID)
 	if err != nil {
 		code, msg := httperr.Error(err)
 		return echo.NewHTTPError(code, msg)
