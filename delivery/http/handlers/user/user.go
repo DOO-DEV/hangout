@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	param "hangout/param/http"
 	"hangout/pkg/claims"
-	"hangout/pkg/constants"
 	"hangout/pkg/httperr"
 	"net/http"
 )
@@ -76,24 +75,23 @@ func (h Handler) UploadProfileImage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity)
 	}
 
-	if err := h.userSvc.SaveProfileImage(c.Request().Context(), img, claims.ID); err != nil {
+	res, err := h.userSvc.SaveProfileImage(c.Request().Context(), param.SaveProfileImageRequest{}, img, claims.ID)
+	if err != nil {
 		return nil
 	}
 
-	return c.JSON(http.StatusCreated, echo.Map{
-		"message": constants.FileUploadedSuccess,
-	})
+	return c.JSON(http.StatusCreated, res)
 }
 
 func (h Handler) GetPrimaryImage(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
-	h.userSvc.GetPrimaryProfileImage(c.Request().Context(), claims.ID)
+	h.userSvc.GetPrimaryProfileImage(c.Request().Context(), param.GetPrimaryProfileImageRequest{}, claims.ID)
 	return nil
 }
 
 func (h Handler) GetAllProfileImages(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
-	res, err := h.userSvc.GetAllProfileImages(c.Request().Context(), claims.ID)
+	res, err := h.userSvc.GetAllProfileImages(c.Request().Context(), param.GetAllProfileImagesRequest{}, claims.ID)
 	if err != nil {
 		code, msg := httperr.Error(err)
 		return echo.NewHTTPError(code, msg)
@@ -103,7 +101,8 @@ func (h Handler) GetAllProfileImages(c echo.Context) error {
 }
 
 func (h Handler) DeleteProfileImage(c echo.Context) error {
-	var req param.DeleteProfileImage
+	var req param.DeleteProfileImageRequest
+
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -124,6 +123,10 @@ func (h Handler) DeleteProfileImage(c echo.Context) error {
 func (h Handler) SetImageAsPrimary(c echo.Context) error {
 	var req param.SetImageAsPrimaryRequest
 	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	if err := h.validator.ValidateSetImageAsPrimaryRequest(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 

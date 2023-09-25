@@ -1,5 +1,18 @@
 package param
 
+type SaveProfileImageRequest struct {
+}
+
+type SaveProfileImageResponse struct {
+}
+
+type GetPrimaryProfileImageRequest struct {
+}
+
+type GetPrimaryProfileImageResponse struct {
+	message string `json:"message"`
+}
+
 type GetAllProfileImagesRequest struct {
 }
 
@@ -7,8 +20,12 @@ type GetAllProfileImagesResponse struct {
 	Data []string `json:"data"`
 }
 
-type DeleteProfileImage struct {
+type DeleteProfileImageRequest struct {
 	ImageID string `json:"image_id"`
+}
+
+type DeleteProfileImageResponse struct {
+	message string `json:"message"`
 }
 
 type SetImageAsPrimaryRequest struct {

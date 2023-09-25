@@ -6,20 +6,25 @@ import (
 	"mime/multipart"
 )
 
-func (s Service) SaveProfileImage(ctx context.Context, image *multipart.FileHeader, userID string) error {
+func (s Service) SaveProfileImage(
+	ctx context.Context,
+	_ param.SaveProfileImageRequest,
+	image *multipart.FileHeader,
+	userID string,
+) (*param.SaveProfileImageRequest, error) {
 
-	return nil
+	return nil, nil
 }
 
-func (s Service) GetPrimaryProfileImage(ctx context.Context, userID string) (string, error) {
+func (s Service) GetPrimaryProfileImage(ctx context.Context, req param.GetPrimaryProfileImageRequest, userID string) (*param.GetPrimaryProfileImageResponse, error) {
 	return "", nil
 }
 
-func (s Service) GetAllProfileImages(ctx context.Context, userID string) (*param.GetAllProfileImageResponse, error) {
+func (s Service) GetAllProfileImages(ctx context.Context, _ param.GetAllProfileImagesRequest, userID string) (*param.GetAllProfileImagesResponse, error) {
 	return &param.GetAllProfileImageResponse{Data: []string{}}, nils
 }
 
-func (s Service) DeleteProfileImage(ctx context.Context, req param.DeleteProfileImage, userID string) (*param.GetAllProfileImageResponse, error) {
+func (s Service) DeleteProfileImage(ctx context.Context, req param.DeleteProfileImage, userID string) (*param.DeleteProfileImage, error) {
 	return nil, nil
 }
 

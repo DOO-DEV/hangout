@@ -26,7 +26,13 @@ func (v Validator) ValidateLoginRequest(req param.LoginRequest) error {
 	)
 }
 
-func (v Validator) ValidateDeleteProfileImageRequest(req param.DeleteProfileImage) error {
+func (v Validator) ValidateDeleteProfileImageRequest(req param.DeleteProfileImageRequest) error {
+	return validation.ValidateStruct(&req,
+		validation.Field(&req.ImageID, validation.Required),
+	)
+}
+
+func (v Validator) ValidateSetImageAsPrimaryRequest(req param.SetImageAsPrimaryRequest) error {
 	return validation.ValidateStruct(&req,
 		validation.Field(&req.ImageID, validation.Required),
 	)
