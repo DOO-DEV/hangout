@@ -14,6 +14,9 @@ type AuthGenerator interface {
 	CreateToken(u *entity.User) (string, error)
 }
 
+type ImageStorage interface {
+}
+
 type Service struct {
 	repo          Repository
 	authGenerator AuthGenerator
