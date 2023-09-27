@@ -4,6 +4,7 @@ type SaveProfileImageRequest struct {
 }
 
 type SaveProfileImageResponse struct {
+	ImageUrl string `json:"image_url"`
 }
 
 type GetPrimaryProfileImageRequest struct {

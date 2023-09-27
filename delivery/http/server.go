@@ -45,7 +45,7 @@ func New(httpCfg Config,
 		config:             httpCfg,
 		router:             echo.New(),
 		healthCheckHandler: health_check.New(),
-		userHandler:        user_handler.New(userValidator, userSvc, authCfg),
+		userHandler:        user_handler.New(userValidator, userSvc, authCfg, authSvc),
 		groupHandler:       grouphandler.New(gValidator, groupSvc, authCfg, authSvc),
 		chatHandler:        chathandler.New(chatValidator, authSvc, authCfg, chatSvc),
 	}

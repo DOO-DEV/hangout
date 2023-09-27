@@ -14,4 +14,6 @@ const (
 	ErrorMsgUserNotFound          = "user not found"
 	ErrorMsgUsersAreNotConnected  = "users are not in same group or connected groups"
 	ErrorMsgNoChatMessage         = "there is no chat messages"
+	ErrorMsgCantPreformFile       = "can't preform uploaded file"
+	ErrorMsgCantUploadFile        = "can't upload file"
 )

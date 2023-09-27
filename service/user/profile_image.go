@@ -3,6 +3,7 @@ package userservice
 import (
 	"context"
 	param "hangout/param/http"
+	"hangout/pkg/richerror"
 	"mime/multipart"
 )
 
@@ -11,9 +12,19 @@ func (s Service) SaveProfileImage(
 	_ param.SaveProfileImageRequest,
 	image *multipart.FileHeader,
 	userID string,
-) (*param.SaveProfileImageRequest, error) {
+) (*param.SaveProfileImageResponse, error) {
+	const op = "UserService.SaveProfileImage"
 
-	return nil, nil
+	url, err := s.imageStorage.SaveImageIntoStorage(ctx, image)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err)
+	}
+
+	if err := s.repo.SaveProfileImageInfo(ctx, url, userID); err != nil {
+		return nil, richerror.New(op).WithError(err)
+	}
+
+	return &param.SaveProfileImageResponse{ImageUrl: url}, nil
 }
 
 func (s Service) GetPrimaryProfileImage(ctx context.Context,

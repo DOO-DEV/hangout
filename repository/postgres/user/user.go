@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"hangout/entity"
+	"hangout/pkg/errmsg"
 	"hangout/pkg/richerror"
 )
 
@@ -67,4 +70,41 @@ func (d *DB) GetUserByID(ctx context.Context, userID string) (*entity.User, erro
 	}
 
 	return u, nil
+}
+
+func (d *DB) GetLastInsertedProfileImageOrder(ctx context.Context, userID string) (sql.NullInt32, error) {
+	const op = "UserRepository.GetLastInsertedProfileImageOrder"
+
+	row := d.conn.Conn().QueryRowContext(ctx, `select MAX("order") from "account_images" where "account" = $1`, userID)
+	var order sql.NullInt32
+	if err := row.Scan(&order); err != nil {
+		fmt.Println(err)
+		if d.conn.IsEmptyRowError(err) {
+			return order, nil
+		}
+		return order, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return order, nil
+}
+
+func (d *DB) SaveProfileImageInfo(ctx context.Context, imageUrl, useID string) error {
+	const op = "UserRepository.SaveProfileImageInfo"
+
+	order, err := d.GetLastInsertedProfileImageOrder(ctx, useID)
+	if err != nil {
+		return richerror.New(op).WithError(err)
+	}
+
+	isPrimary := false
+	order.Int32 += 1
+	if order.Int32 == 1 {
+		isPrimary = true
+	}
+	_, err = d.conn.Conn().ExecContext(ctx, `insert into "account_images" values ($1, $2, $3, $4, $5)`, uuid.NewString(), useID, imageUrl, isPrimary, order.Int32)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
 }

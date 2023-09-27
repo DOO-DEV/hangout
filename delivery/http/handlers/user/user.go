@@ -77,7 +77,8 @@ func (h Handler) UploadProfileImage(c echo.Context) error {
 
 	res, err := h.userSvc.SaveProfileImage(c.Request().Context(), param.SaveProfileImageRequest{}, img, claims.ID)
 	if err != nil {
-		return nil
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
 	}
 
 	return c.JSON(http.StatusCreated, res)
