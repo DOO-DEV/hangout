@@ -1,5 +1,11 @@
 ENTRY_POINT?=./main.go
 
+setup:
+	@echo Installing dependencies...
+	go mod tidy
+	go install github.com/cosmtrek/air@latest
+	go install github.com/swaggo/swag/cmd/swag@v1.16.2
+
 dev:
 	air -c .air.toml
 
