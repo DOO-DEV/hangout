@@ -516,6 +516,199 @@
                     }
                 }
             }
+        },
+        "/user/profile_img": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can get all uploaded image for it's account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-image"
+                ],
+                "summary": "Get all profile images",
+                "parameters": [
+                    {
+                        "description": "Request object",
+                        "name": "image",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetAllProfileImagesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetAllProfileImagesResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can set profile image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-image"
+                ],
+                "summary": "Upload profile image",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "The image to upload",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "Request object",
+                        "name": "image",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/param.SaveProfileImageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/param.SaveProfileImageResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can delete a certain profile image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-image"
+                ],
+                "summary": "Delete on profile image",
+                "parameters": [
+                    {
+                        "description": "ImageID",
+                        "name": "image",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.DeleteProfileImageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.DeleteProfileImageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/profile_img/primary": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can get it's newly(primary) image uploaded",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-image"
+                ],
+                "summary": "Get primary profile image",
+                "parameters": [
+                    {
+                        "description": "Request object",
+                        "name": "image",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetPrimaryProfileImageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.GetPrimaryProfileImageResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "User can change the primary image with this route",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile-image"
+                ],
+                "summary": "Set an image as primary",
+                "parameters": [
+                    {
+                        "description": "imageID",
+                        "name": "image",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/param.SetImageAsPrimaryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/param.SetImageAsPrimaryResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -579,6 +772,31 @@
                 }
             }
         },
+        "param.DeleteProfileImageRequest": {
+            "type": "object",
+            "properties": {
+                "image_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.DeleteProfileImageResponse": {
+            "type": "object"
+        },
+        "param.GetAllProfileImagesRequest": {
+            "type": "object"
+        },
+        "param.GetAllProfileImagesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "param.GetChatHistoryRequest": {
             "type": "object"
         },
@@ -613,6 +831,17 @@
                     "items": {
                         "$ref": "#/definitions/param.MemberInfo"
                     }
+                }
+            }
+        },
+        "param.GetPrimaryProfileImageRequest": {
+            "type": "object"
+        },
+        "param.GetPrimaryProfileImageResponse": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
                 }
             }
         },
@@ -776,6 +1005,28 @@
             }
         },
         "param.RegisterResponse": {
+            "type": "object"
+        },
+        "param.SaveProfileImageRequest": {
+            "type": "object"
+        },
+        "param.SaveProfileImageResponse": {
+            "type": "object",
+            "properties": {
+                "image_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.SetImageAsPrimaryRequest": {
+            "type": "object",
+            "properties": {
+                "image_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "param.SetImageAsPrimaryResponse": {
             "type": "object"
         }
     }

@@ -68,6 +68,18 @@ func (h Handler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// UploadProfileImage godoc
+//
+//	@Summary		Upload profile image
+//	@Description	User can set profile image
+//	@Tags			profile-image
+//	@Security		auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			image	formData file	true							"The image to upload"
+//	@Param			image	body		param.SaveProfileImageRequest	false	"Request object"
+//	@Success		201		{object}	param.SaveProfileImageResponse
+//	@Router			/user/profile_img [post]
 func (h Handler) UploadProfileImage(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
 	img, err := c.FormFile("image")
@@ -84,6 +96,17 @@ func (h Handler) UploadProfileImage(c echo.Context) error {
 	return c.JSON(http.StatusCreated, res)
 }
 
+// GetPrimaryImage godoc
+//
+//	@Summary		Get primary profile image
+//	@Description	User can get it's newly(primary) image uploaded
+//	@Tags			profile-image
+//	@Security		auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			image	body		param.GetPrimaryProfileImageRequest	false	"Request object"
+//	@Success		200		{object}	param.GetPrimaryProfileImageResponse
+//	@Router			/user/profile_img/primary [get]
 func (h Handler) GetPrimaryImage(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
 	res, err := h.userSvc.GetPrimaryProfileImage(c.Request().Context(), param.GetPrimaryProfileImageRequest{}, claims.ID)
@@ -95,6 +118,17 @@ func (h Handler) GetPrimaryImage(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// GetAllProfileImages godoc
+//
+//	@Summary		Get all profile images
+//	@Description	User can get all uploaded image for it's account
+//	@Tags			profile-image
+//	@Security		auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			image	body		param.GetAllProfileImagesRequest	false	"Request object"
+//	@Success		200		{object}	param.GetAllProfileImagesResponse
+//	@Router			/user/profile_img [get]
 func (h Handler) GetAllProfileImages(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
 	res, err := h.userSvc.GetAllProfileImages(c.Request().Context(), param.GetAllProfileImagesRequest{}, claims.ID)
@@ -106,6 +140,17 @@ func (h Handler) GetAllProfileImages(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// DeleteProfileImage godoc
+//
+//	@Summary		Delete on profile image
+//	@Description	User can delete a certain profile image
+//	@Tags			profile-image
+//	@Security		auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			image	body		param.DeleteProfileImageRequest	true	"ImageID"
+//	@Success		200		{object}	param.DeleteProfileImageResponse
+//	@Router			/user/profile_img [delete]
 func (h Handler) DeleteProfileImage(c echo.Context) error {
 	var req param.DeleteProfileImageRequest
 
@@ -126,6 +171,17 @@ func (h Handler) DeleteProfileImage(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// SetImageAsPrimary godoc
+//
+//	@Summary		Set an image as primary
+//	@Description	User can change the primary image with this route
+//	@Tags			profile-image
+//	@Security		auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			image	body		param.SetImageAsPrimaryRequest	true	"imageID"
+//	@Success		200		{object}	param.SetImageAsPrimaryResponse
+//	@Router			/user/profile_img/primary [patch]
 func (h Handler) SetImageAsPrimary(c echo.Context) error {
 	var req param.SetImageAsPrimaryRequest
 	if err := c.Bind(&req); err != nil {

@@ -1,3 +1,5 @@
+ENTRY_POINT?=./main.go
+
 dev:
 	air -c .air.toml
 
@@ -8,3 +10,6 @@ migration-up:
 migration-down:
 	@echo migrating down...
 	go run cmd/migration/main.go "migrate-down"
+
+generate-doc:
+	swag fmt && swag init -g ${ENTRY_POINT} -o ./docs --generatedTime=true

@@ -38,6 +38,22 @@ definitions:
       name:
         type: string
     type: object
+  param.DeleteProfileImageRequest:
+    properties:
+      image_id:
+        type: string
+    type: object
+  param.DeleteProfileImageResponse:
+    type: object
+  param.GetAllProfileImagesRequest:
+    type: object
+  param.GetAllProfileImagesResponse:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+    type: object
   param.GetChatHistoryRequest:
     type: object
   param.GetChatHistoryResponse:
@@ -61,6 +77,13 @@ definitions:
         items:
           $ref: '#/definitions/param.MemberInfo'
         type: array
+    type: object
+  param.GetPrimaryProfileImageRequest:
+    type: object
+  param.GetPrimaryProfileImageResponse:
+    properties:
+      url:
+        type: string
     type: object
   param.GetUserChatResponse:
     properties:
@@ -165,6 +188,20 @@ definitions:
         type: string
     type: object
   param.RegisterResponse:
+    type: object
+  param.SaveProfileImageRequest:
+    type: object
+  param.SaveProfileImageResponse:
+    properties:
+      image_url:
+        type: string
+    type: object
+  param.SetImageAsPrimaryRequest:
+    properties:
+      image_id:
+        type: string
+    type: object
+  param.SetImageAsPrimaryResponse:
     type: object
 host: localhost:3000
 info:
@@ -488,6 +525,125 @@ paths:
       summary: Register account
       tags:
       - auth
+  /user/profile_img:
+    delete:
+      consumes:
+      - application/json
+      description: User can delete a certain profile image
+      parameters:
+      - description: ImageID
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/param.DeleteProfileImageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.DeleteProfileImageResponse'
+      security:
+      - auth: []
+      summary: Delete on profile image
+      tags:
+      - profile-image
+    get:
+      consumes:
+      - application/json
+      description: User can get all uploaded image for it's account
+      parameters:
+      - description: Request object
+        in: body
+        name: image
+        schema:
+          $ref: '#/definitions/param.GetAllProfileImagesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.GetAllProfileImagesResponse'
+      security:
+      - auth: []
+      summary: Get all profile images
+      tags:
+      - profile-image
+    post:
+      consumes:
+      - application/json
+      description: User can set profile image
+      parameters:
+      - description: The image to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Request object
+        in: body
+        name: image
+        schema:
+          $ref: '#/definitions/param.SaveProfileImageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/param.SaveProfileImageResponse'
+      security:
+      - auth: []
+      summary: Upload profile image
+      tags:
+      - profile-image
+  /user/profile_img/primary:
+    get:
+      consumes:
+      - application/json
+      description: User can get it's newly(primary) image uploaded
+      parameters:
+      - description: Request object
+        in: body
+        name: image
+        schema:
+          $ref: '#/definitions/param.GetPrimaryProfileImageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.GetPrimaryProfileImageResponse'
+      security:
+      - auth: []
+      summary: Get primary profile image
+      tags:
+      - profile-image
+    patch:
+      consumes:
+      - application/json
+      description: User can change the primary image with this route
+      parameters:
+      - description: imageID
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/param.SetImageAsPrimaryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/param.SetImageAsPrimaryResponse'
+      security:
+      - auth: []
+      summary: Set an image as primary
+      tags:
+      - profile-image
 schemes:
 - http
 swagger: "2.0"
