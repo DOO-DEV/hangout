@@ -173,18 +173,62 @@ func (d *DB) DeleteProfileImage(ctx context.Context, userID, imgID string) (stri
 	}
 
 	// update the order of profile images
-	_, err = tx.ExecContext(ctx, `update "account_images" set "order" = "order" - 1 where "order" > $1`, order)
+	_, err = tx.ExecContext(ctx, `update "account_images" set "order" = "order" - 1 where "order" > $1 and "account" = $1`, order, userID)
 	if err != nil {
 		return url, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
 
 	// update primary
 	if isPrimary {
-		_, err = tx.ExecContext(ctx, `update "account_images" set "is_primary" = 'true' where "order" = 1`)
+		_, err = tx.ExecContext(ctx, `update "account_images" set "is_primary" = 'true' where "order" = 1 and "account" = $1`, userID)
 		if err != nil {
 			return url, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 		}
 	}
 
 	return url, nil
+}
+
+func (d *DB) SetImageAsPrimary(ctx context.Context, userID, imgID string) error {
+	const op = "UserRepository.SetImageAsPrimary"
+
+	tx, err := d.conn.Conn().BeginTx(ctx, nil)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+
+	// first update the new primary image to 'true' and set the past image to 'false'
+	_, err = tx.ExecContext(ctx, `update "account_images" set "is_primary" = 'false' where "account" = $1 and "is_primary" = 'true'`, userID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	row := tx.QueryRowContext(ctx, `update "account_images" set "is_primary" = 'true' where "id" = $1 RETURNING "order"`, imgID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	var order int
+	if err = row.Scan(&order); err != nil {
+		if d.conn.IsEmptyRowError(err) {
+			return richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	// reorder the images
+	_, err = tx.ExecContext(ctx, `update "account_images" set "order" = "order" + 1 where "account" = $1 and "order" < $2`, userID, order)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	_, err = tx.ExecContext(ctx, `update "account_images" set "order" = 1 where "account" = $1 and "is_primary" = 'true'`, userID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
 }

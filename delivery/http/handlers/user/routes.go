@@ -15,4 +15,5 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	withAuth.GET("/profile_img/primary", h.GetPrimaryImage)
 	withAuth.GET("/profile_img", h.GetAllProfileImages)
 	withAuth.DELETE("/profile_img", h.DeleteProfileImage)
+	withAuth.PATCH("/profile_img/primary", h.SetImageAsPrimary)
 }

@@ -99,5 +99,11 @@ func (s Service) DeleteProfileImage(ctx context.Context,
 func (s Service) SetImageAsPrimary(ctx context.Context,
 	req param.SetImageAsPrimaryRequest,
 	userID string) (*param.SetImageAsPrimaryResponse, error) {
-	return nil, nil
+	const op = "UserService.SetImageAsPrimary"
+
+	if err := s.repo.SetImageAsPrimary(ctx, userID, req.ImageID); err != nil {
+		return nil, richerror.New(op).WithError(err)
+	}
+
+	return &param.SetImageAsPrimaryResponse{}, nil
 }

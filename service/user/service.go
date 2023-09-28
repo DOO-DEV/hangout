@@ -13,6 +13,7 @@ type Repository interface {
 	GetPrimaryProfileImage(ctx context.Context, userID string) (string, error)
 	GetAllProfileImages(ctx context.Context, userID string) ([]string, error)
 	DeleteProfileImage(ctx context.Context, userID, imgID string) (string, error)
+	SetImageAsPrimary(ctx context.Context, userID, imgID string) error
 }
 
 type AuthGenerator interface {
