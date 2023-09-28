@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	param "hangout/param/http"
 	"hangout/pkg/apperror"
 	"time"
@@ -28,7 +29,7 @@ func (v Validator) ValidateLoginRequest(req param.LoginRequest) error {
 
 func (v Validator) ValidateDeleteProfileImageRequest(req param.DeleteProfileImageRequest) error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.ImageID, validation.Required),
+		validation.Field(&req.ImageID, validation.Required, is.UUID),
 	)
 }
 

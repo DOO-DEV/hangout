@@ -8,6 +8,7 @@ import (
 	"hangout/pkg/object_name"
 	"hangout/pkg/richerror"
 	"mime/multipart"
+	"time"
 )
 
 const (
@@ -31,7 +32,28 @@ func (a Adapter) SaveImageIntoStorage(ctx context.Context, file *multipart.FileH
 		return "", richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgNotFound)
 	}
 
-	objUrl := fmt.Sprintf("%s/%s", a.cfg.Endpoint, objectName)
+	return objectName, nil
+}
 
-	return objUrl, nil
+func (a Adapter) GetTemporaryProfileImageUrl(ctx context.Context, fileName string) (string, error) {
+	const op = "MinioAdapter.GetTemporaryProfileImageUrl"
+
+	expTime := time.Duration(24) * time.Hour
+
+	url, err := a.Conn().PresignedGetObject(ctx, bucketName, fileName, expTime, nil)
+	if err != nil {
+		return "", richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return url.String(), nil
+}
+
+func (a Adapter) DeleteProfileImage(ctx context.Context, fileName string) error {
+	const op = "MinioAdapter.DeleteProfileImage"
+
+	if err := a.Conn().RemoveObject(ctx, bucketName, fileName, minio.RemoveObjectOptions{}); err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
 }

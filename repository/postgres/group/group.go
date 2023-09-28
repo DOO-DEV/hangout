@@ -143,7 +143,6 @@ func (d DB) GetOwnedGroup(ctx context.Context, userID string) (*entity.Group, er
 func (d DB) ListAllJoinRequestToMyGroup(ctx context.Context, groupID string) ([]entity.PendingList, error) {
 	const op = "GroupRepository.ListAllJoinRequestToMyGroup"
 
-	fmt.Println(groupID)
 	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "pending_list" where "group_id" = $1 and "active"='true' order by "sent_at" desc`, groupID)
 	defer rows.Close()
 	if err != nil {

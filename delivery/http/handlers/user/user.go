@@ -86,8 +86,13 @@ func (h Handler) UploadProfileImage(c echo.Context) error {
 
 func (h Handler) GetPrimaryImage(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
-	h.userSvc.GetPrimaryProfileImage(c.Request().Context(), param.GetPrimaryProfileImageRequest{}, claims.ID)
-	return nil
+	res, err := h.userSvc.GetPrimaryProfileImage(c.Request().Context(), param.GetPrimaryProfileImageRequest{}, claims.ID)
+	if err != nil {
+		code, msg := httperr.Error(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h Handler) GetAllProfileImages(c echo.Context) error {

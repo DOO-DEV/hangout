@@ -12,4 +12,7 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	withAuth := g.Group("/user", authmiddleware.Auth(h.authSvc, h.authCfg))
 
 	withAuth.POST("/profile_img", h.UploadProfileImage)
+	withAuth.GET("/profile_img/primary", h.GetPrimaryImage)
+	withAuth.GET("/profile_img", h.GetAllProfileImages)
+	withAuth.DELETE("/profile_img", h.DeleteProfileImage)
 }

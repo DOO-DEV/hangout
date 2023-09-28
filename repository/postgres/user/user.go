@@ -108,3 +108,83 @@ func (d *DB) SaveProfileImageInfo(ctx context.Context, imageUrl, useID string) e
 
 	return nil
 }
+
+func (d *DB) GetPrimaryProfileImage(ctx context.Context, userID string) (string, error) {
+	const op = "UserRepository.GetPrimaryProfileImage"
+
+	row := d.conn.Conn().QueryRowContext(ctx, `select "url" from "account_images" where "account" = $1 and "is_primary" = 'true'`, userID)
+	var imageUrl string
+	if err := row.Scan(&imageUrl); err != nil {
+		fmt.Println(err)
+		if d.conn.IsEmptyRowError(err) {
+			return imageUrl, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		return imageUrl, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return imageUrl, nil
+}
+
+func (d *DB) GetAllProfileImages(ctx context.Context, userID string) ([]string, error) {
+	const op = "UserRepository.GetAllProfileImages"
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select "url" from "account_images" where "account" = $1`, userID)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	urls := make([]string, 0)
+	for rows.Next() {
+		var u string
+		if err := rows.Scan(&u); err != nil {
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+		}
+		urls = append(urls, u)
+	}
+
+	return urls, nil
+}
+
+func (d *DB) DeleteProfileImage(ctx context.Context, userID, imgID string) (string, error) {
+	const op = "UserRepository.DeleteProfileImage"
+
+	tx, err := d.conn.Conn().BeginTx(ctx, nil)
+	if err != nil {
+		fmt.Println("tx", err)
+		return "", richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+
+	row := tx.QueryRowContext(ctx, `delete from "account_images" where "account" = $1 and "id" = $2 RETURNING "url", "is_primary", "order"`, userID, imgID)
+	var url string
+	var order int
+	var isPrimary bool
+	if err = row.Scan(&url, &isPrimary, &order); err != nil {
+		if d.conn.IsEmptyRowError(err) {
+			return url, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		return url, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	// update the order of profile images
+	_, err = tx.ExecContext(ctx, `update "account_images" set "order" = "order" - 1 where "order" > $1`, order)
+	if err != nil {
+		return url, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	// update primary
+	if isPrimary {
+		_, err = tx.ExecContext(ctx, `update "account_images" set "is_primary" = 'true' where "order" = 1`)
+		if err != nil {
+			return url, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+		}
+	}
+
+	return url, nil
+}

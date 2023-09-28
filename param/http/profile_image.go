@@ -11,7 +11,7 @@ type GetPrimaryProfileImageRequest struct {
 }
 
 type GetPrimaryProfileImageResponse struct {
-	message string `json:"message"`
+	Url string `json:"url"`
 }
 
 type GetAllProfileImagesRequest struct {
@@ -26,7 +26,6 @@ type DeleteProfileImageRequest struct {
 }
 
 type DeleteProfileImageResponse struct {
-	message string `json:"message"`
 }
 
 type SetImageAsPrimaryRequest struct {
