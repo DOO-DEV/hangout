@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "messages" (
     "chat_id" UUID REFERENCES "chats"("id"),
     "sender_id" TEXT REFERENCES "users"("id"),
     "content" TEXT,
-    "type" TEXT,
+    "type" INT NOT NULL,
     "timestamp" TIMESTAMP DEFAULT NOW()
 );
 
