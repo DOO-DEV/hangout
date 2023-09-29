@@ -1,7 +1,7 @@
 -- +migrate UP
 CREATE TABLE IF NOT EXISTS "private_chat_participants" (
     "id" UUID,
-    "chat_id" UUID REFERENCES "chats"("id"),
+    "chat_id" UUID REFERENCES "private_chats"("id"),
     "user_id" TEXT REFERENCES "users"("id"),
     "joined_at" TIMESTAMP DEFAULT NOW()
 );

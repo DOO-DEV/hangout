@@ -1,8 +1,7 @@
 -- +migrate Up
-CREATE TABLE IF NOT EXISTS "chats" (
+CREATE TABLE IF NOT EXISTS "group_chats" (
     "id" UUID PRIMARY KEY,
-    "name" VARCHAR(80),
-    "type" INT NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
     "created_at" TIMESTAMP DEFAULT NOW(),
     "updated_at" TIMESTAMP DEFAULT NOW()
 );
