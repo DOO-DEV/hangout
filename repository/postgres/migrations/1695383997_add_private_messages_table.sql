@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "private_messages" (
     "sender_id" TEXT REFERENCES "users"("id"),
     "content" TEXT,
     "type" INT NOT NULL,
+    "status" INT NOT NULL,
     "timestamp" TIMESTAMP DEFAULT NOW()
 );
 

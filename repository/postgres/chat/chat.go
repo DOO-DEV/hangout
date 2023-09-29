@@ -64,3 +64,17 @@ func (d DB) GetGroupChatByID(ctx context.Context, groupID string) (*entity.Group
 		Name: chatName,
 	}, nil
 }
+
+func (d DB) AddToPrivateChatParticipants(ctx context.Context, p1, p2 entity.PrivateChatParticipant) error {
+	const op = "ChatRepository.AddToPrivateChatParticipants"
+
+	_, err := d.conn.Conn().ExecContext(ctx,
+		`insert into "private_chat_participants"("id", "chat_id", "user_id")
+			  values ($1, $2, $3),
+			         ($4, $5, $6);`, p1.ID, p1.ChatID, p1.UserID, p2.ID, p2.ChatID, p2.UserID)
+	if err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
+}

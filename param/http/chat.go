@@ -24,8 +24,13 @@ type GetPrivateChatByNameResponse struct {
 	ChatName string
 }
 
-type ChatMessageRequest struct {
-	Content string `json:"content"`
+type InsertPrivateChatParticipantsRequest struct {
+	ChatID  string `json:"chat_id"`
+	UserID1 string `json:"user-id-1"`
+	UserID2 string `json:"user_id_2"`
+}
+
+type InsertPrivateChatParticipantsResponse struct {
 }
 
 type ChatMessageResponse struct {

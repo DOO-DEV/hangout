@@ -10,6 +10,7 @@ type chatRepository interface {
 	GetPrivateChatByName(ctx context.Context, name string) (*entity.PrivateChat, error)
 	CreateGroupChat(ctx context.Context, group entity.GroupChat) (*entity.GroupChat, error)
 	GetGroupChatByID(ctx context.Context, groupID string) (*entity.GroupChat, error)
+	AddToPrivateChatParticipants(ctx context.Context, p1, p2 entity.PrivateChatParticipant) error
 }
 
 type groupRepository interface {

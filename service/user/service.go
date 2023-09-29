@@ -14,6 +14,7 @@ type Repository interface {
 	GetAllProfileImages(ctx context.Context, userID string) ([]string, error)
 	DeleteProfileImage(ctx context.Context, userID, imgID string) (string, error)
 	SetImageAsPrimary(ctx context.Context, userID, imgID string) error
+	GetUserByID(ctx context.Context, userID string) (*entity.User, error)
 }
 
 type AuthGenerator interface {
