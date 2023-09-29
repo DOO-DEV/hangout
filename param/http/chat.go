@@ -4,15 +4,23 @@ import (
 	"time"
 )
 
-type CreateChatRequest struct {
-	Name string `json:"name"`
-	Type int    `json:"type"`
+type CreatePrivateChatRequest struct {
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
 }
 
-type CreateChatResponse struct {
+type CreatePrivateChatResponse struct {
 	ChatID   string `json:"chat_id"`
 	ChatName string `json:"chat_name"`
 }
+
+type GetPrivateChatByNameRequest struct {
+	Name string `json:"name"`
+}
+
+type GetPrivateChatByNameResponse struct {
+}
+
 type ChatMessageRequest struct {
 	Content string `json:"content"`
 }

@@ -15,6 +15,7 @@ type chatRepository interface {
 	SaveMessage(ctx context.Context, m entity.Message) error
 	CreateChat(ctx context.Context, c *entity.Chat) (*entity.Chat, error)
 	GetChatByUsersIds(ctx context.Context, u1, u2 string) (*entity.Chat, error)
+	CreatePrivateChat(ctx context.Context, chat entity.PrivateChat) (*entity.PrivateChat, error)
 }
 
 type groupRepository interface {

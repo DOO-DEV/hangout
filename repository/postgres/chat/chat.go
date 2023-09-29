@@ -105,6 +105,13 @@ func (d DB) GetUserChatList(ctx context.Context, userID string) ([]entity.Chat, 
 	return chats, nil
 }
 
-func (d DB) (ctx context.Context, participants []string) (entity.Chat, error) {
-	d.conn.Conn().
+func (d DB) CreatePrivateChat(ctx context.Context, chat entity.PrivateChat) (*entity.PrivateChat, error) {
+	const op = "ChatRepository.CreatePrivateChat"
+
+	_, err := d.conn.Conn().ExecContext(ctx, `insert into "private_chat"("id", "name") values ($1, $2)`, chat.ID, chat.Name)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return &chat, nil
 }
