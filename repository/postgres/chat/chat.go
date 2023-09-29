@@ -31,7 +31,6 @@ func (d DB) CreateChat(ctx context.Context, c *entity.Chat) (*entity.Chat, error
 
 	_, err := d.conn.Conn().ExecContext(ctx, `insert into "chats"("id","user_1", "user_2", "type") values ($1, $2, $3, $4)`, c.ID, c.UsersIDs[0], c.UsersIDs[1], c.Type)
 	if err != nil {
-		fmt.Println(err)
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
 
@@ -104,4 +103,8 @@ func (d DB) GetUserChatList(ctx context.Context, userID string) ([]entity.Chat, 
 	}
 
 	return chats, nil
+}
+
+func (d DB) (ctx context.Context, participants []string) (entity.Chat, error) {
+	d.conn.Conn().
 }

@@ -4,7 +4,7 @@ setup:
 	@echo Installing dependencies...
 	go mod tidy
 	go install github.com/cosmtrek/air@latest
-	go install github.com/swaggo/swag/cmd/swag@v1.16.2
+	go install github.com/swaggo/swag/cmd/swag@latest # if not working change the version
 
 dev:
 	air -c .air.toml

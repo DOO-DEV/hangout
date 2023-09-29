@@ -2,15 +2,24 @@ package entity
 
 import "time"
 
-type ChatType string
+type ChatType int
 
 const (
-	ChatTypeNormal = "normal"
+	ChatTypePrivate ChatType = iota + 1
+	ChatTypeGroup
 )
 
 type Chat struct {
 	ID        string
-	UsersIDs  []string
 	Type      ChatType
+	Name      string
 	CreatedAt time.Time
+}
+
+func (c Chat) TypeIsValid() bool {
+	if c.Type > ChatTypeGroup || c.Type < ChatTypePrivate {
+		return false
+	}
+
+	return true
 }
