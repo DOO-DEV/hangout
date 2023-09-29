@@ -1,13 +1,10 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS "chats" (
-    "id" TEXT,
-    "user_1" TEXT,
-    "user_2" TEXT,
-    "type" TEXT,
+    "id" UUID PRIMARY KEY,
+    "name" VARCHAR(80),
+    "type" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT NOW(),
-    PRIMARY KEY ("id"),
-    FOREIGN KEY ("user_1") REFERENCES "users"("id"),
-    FOREIGN KEY ("user_2") REFERENCES "users"("id")
+    "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
 
