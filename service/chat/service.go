@@ -5,17 +5,11 @@ import (
 	"hangout/entity"
 )
 
-type userRepository interface {
-	GetUserByID(ctx context.Context, userID string) (*entity.User, error)
-}
-
 type chatRepository interface {
-	GetUserChatList(ctx context.Context, userID string) ([]entity.Chat, error)
-	GetChatMessages(ctx context.Context, chatID string) ([]entity.Message, error)
-	SaveMessage(ctx context.Context, m entity.Message) error
-	CreateChat(ctx context.Context, c *entity.Chat) (*entity.Chat, error)
-	GetChatByUsersIds(ctx context.Context, u1, u2 string) (*entity.Chat, error)
 	CreatePrivateChat(ctx context.Context, chat entity.PrivateChat) (*entity.PrivateChat, error)
+	GetPrivateChatByName(ctx context.Context, name string) (*entity.PrivateChat, error)
+	CreateGroupChat(ctx context.Context, group entity.GroupChat) (*entity.GroupChat, error)
+	GetGroupChatByID(ctx context.Context, groupID string) (*entity.GroupChat, error)
 }
 
 type groupRepository interface {
@@ -25,13 +19,11 @@ type groupRepository interface {
 type Service struct {
 	chatRepo  chatRepository
 	groupRepo groupRepository
-	userRepo  userRepository
 }
 
-func New(chRepo chatRepository, gRepo groupRepository, uRepo userRepository) Service {
+func New(chRepo chatRepository, gRepo groupRepository) Service {
 	return Service{
 		chatRepo:  chRepo,
 		groupRepo: gRepo,
-		userRepo:  uRepo,
 	}
 }

@@ -6,18 +6,12 @@ import (
 	"hangout/entity"
 	param "hangout/param/http"
 	"hangout/pkg/richerror"
-	"slices"
-	"strings"
 )
 
 func (s Service) Create(ctx context.Context, req param.CreatePrivateChatRequest) (*param.CreatePrivateChatResponse, error) {
 	const op = "ChatService.Create"
 
-	// the name of private chats are "userid-userid" and sort from higher-lower
-	users := []string{req.Receiver, req.Sender}
-	slices.Sort(users)
-
-	chatName := strings.Join(users, "-")
+	chatName := s.createPrivateChatName(req.Sender, req.Receiver)
 
 	c := entity.PrivateChat{
 		ID:   uuid.NewString(),

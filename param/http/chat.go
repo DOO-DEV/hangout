@@ -15,10 +15,13 @@ type CreatePrivateChatResponse struct {
 }
 
 type GetPrivateChatByNameRequest struct {
-	Name string `json:"name"`
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
 }
 
 type GetPrivateChatByNameResponse struct {
+	ChatID   string
+	ChatName string
 }
 
 type ChatMessageRequest struct {

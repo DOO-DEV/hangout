@@ -5,12 +5,22 @@ import (
 	"time"
 )
 
-type CreateGroupRequest struct {
+type CreateGroupChatRequest struct {
 	Name string `json:"name"`
 }
 
-type CreteGroupResponse struct {
+type CreateGroupChatResponse struct {
 	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+
+type GetGroupChatByIDRequest struct {
+	ChatID string `json:"chat_id"`
+}
+
+type GetGroupChatByIDResponse struct {
+	ChatID   string `json:"chat_id"`
+	ChatName string `json:"chat_name"`
 }
 
 type GetAllGroupsRequest struct {
