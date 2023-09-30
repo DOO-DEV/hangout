@@ -19,26 +19,26 @@ import (
 //	@Param			user	body		param.CreateGroupRequest	true	"Create group"
 //	@Success		201		{object}	param.CreteGroupResponse
 //	@Router			/groups [post]
-func (h Handler) CreateGroup(c echo.Context) error {
-	var req param.CreateGroupRequest
-
-	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	if err := h.validator.ValidateCreateGroupRequest(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	user := claims.GetClaimsFromEchoContext(c, h.authConfig)
-	res, err := h.groupSvc.CreateGroup(c.Request().Context(), req, user.ID)
-	if err != nil {
-		code, msg := httperr.Error(err)
-		return echo.NewHTTPError(code, msg)
-	}
-
-	return c.JSON(http.StatusCreated, res)
-}
+//func (h Handler) CreateGroup(c echo.Context) error {
+//	var req param.CreateGroupRequest
+//
+//	if err := c.Bind(&req); err != nil {
+//		return echo.NewHTTPError(http.StatusBadRequest, err)
+//	}
+//
+//	if err := h.validator.ValidateCreateGroupRequest(req); err != nil {
+//		return echo.NewHTTPError(http.StatusBadRequest, err)
+//	}
+//
+//	user := claims.GetClaimsFromEchoContext(c, h.authConfig)
+//	res, err := h.groupSvc.CreateGroup(c.Request().Context(), req, user.ID)
+//	if err != nil {
+//		code, msg := httperr.Error(err)
+//		return echo.NewHTTPError(code, msg)
+//	}
+//
+//	return c.JSON(http.StatusCreated, res)
+//}
 
 // ListAllGroups godoc
 //

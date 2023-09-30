@@ -11,7 +11,7 @@ import (
 func (s Service) GetPrivateChatByName(ctx context.Context, req param.GetPrivateChatByNameRequest) (*param.GetPrivateChatByNameResponse, error) {
 	const op = "ChatService.GetPrivateChatByName"
 
-	chatName := s.createPrivateChatName(req.Sender, req.Receiver)
+	chatName := s.createPrivateChatName(req.SenderID, req.ReceiverID)
 
 	chat, err := s.chatRepo.GetPrivateChatByName(ctx, chatName)
 	if err != nil {
@@ -22,8 +22,8 @@ func (s Service) GetPrivateChatByName(ctx context.Context, req param.GetPrivateC
 	}
 
 	return &param.GetPrivateChatByNameResponse{
-		ChatID:   chat.Name,
-		ChatName: chat.ID,
+		ChatID:   chat.ID,
+		ChatName: chat.Name,
 	}, nil
 }
 

@@ -1,6 +1,6 @@
 -- +migrate Up
 CREATE TABLE IF NOT EXISTS "private_messages" (
-    "id" SERIAL PRIMARY KEY,
+    "id" UUID PRIMARY KEY,
     "chat_id" UUID REFERENCES "private_chats"("id"),
     "sender_id" TEXT REFERENCES "users"("id"),
     "content" TEXT,

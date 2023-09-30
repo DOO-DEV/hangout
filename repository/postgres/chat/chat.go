@@ -10,7 +10,7 @@ import (
 func (d DB) CreatePrivateChat(ctx context.Context, chat entity.PrivateChat) (*entity.PrivateChat, error) {
 	const op = "ChatRepository.CreatePrivateChat"
 
-	_, err := d.conn.Conn().ExecContext(ctx, `insert into "private_chat"("id", "name") values ($1, $2)`, chat.ID, chat.Name)
+	_, err := d.conn.Conn().ExecContext(ctx, `insert into "private_chats"("id", "name") values ($1, $2)`, chat.ID, chat.Name)
 	if err != nil {
 		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}

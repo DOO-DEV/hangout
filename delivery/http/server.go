@@ -13,6 +13,7 @@ import (
 	authservice "hangout/service/auth"
 	chatservice "hangout/service/chat"
 	groupservice "hangout/service/group"
+	messageservice "hangout/service/message"
 	userservice "hangout/service/user"
 	"hangout/validator/chatvalidator"
 	"hangout/validator/groupvalidator"
@@ -40,6 +41,7 @@ func New(httpCfg Config,
 	authSvc authservice.Service,
 	authCfg authservice.Config,
 	chatValidator chatvalidator.Validator,
+	messageSvc messageservice.Service,
 	chatSvc chatservice.Service) Server {
 	return Server{
 		config:             httpCfg,
@@ -47,7 +49,7 @@ func New(httpCfg Config,
 		healthCheckHandler: health_check.New(),
 		userHandler:        user_handler.New(userValidator, userSvc, authCfg, authSvc),
 		groupHandler:       grouphandler.New(gValidator, groupSvc, authCfg, authSvc),
-		chatHandler:        chathandler.New(chatValidator, authSvc, authCfg, chatSvc),
+		chatHandler:        chathandler.New(chatValidator, authSvc, authCfg, chatSvc, messageSvc, userSvc),
 	}
 }
 

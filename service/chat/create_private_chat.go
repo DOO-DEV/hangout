@@ -8,7 +8,7 @@ import (
 	"hangout/pkg/richerror"
 )
 
-func (s Service) Create(ctx context.Context, req param.CreatePrivateChatRequest) (*param.CreatePrivateChatResponse, error) {
+func (s Service) CreatePrivateChat(ctx context.Context, req param.CreatePrivateChatRequest) (*param.CreatePrivateChatResponse, error) {
 	const op = "ChatService.Create"
 
 	chatName := s.createPrivateChatName(req.Sender, req.Receiver)

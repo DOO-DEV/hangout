@@ -9,7 +9,7 @@ func (h Handler) SetRoutes(g *echo.Group) {
 	gWithAuth := g.Group("", authmiddleware.Auth(h.authSvc, h.authConfig))
 
 	group := gWithAuth.Group("/groups")
-	group.POST("", h.CreateGroup)
+	//group.POST("", h.CreateGroup)
 	group.GET("", h.ListAllGroups)
 	group.GET("/my", h.GetMyGroup)
 

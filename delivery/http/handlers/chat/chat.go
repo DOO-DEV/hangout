@@ -1,98 +1,123 @@
 package chathandler
 
 import (
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	param "hangout/param/http"
-	claims "hangout/pkg/claims"
+	"hangout/pkg/claims"
 	"hangout/pkg/httperr"
 	"net/http"
+	"sync"
+	"time"
 )
 
-// ChatWithOtherUser godoc
-//
-//	@Summary		Chat with users
-//	@Description	Chat with other users
-//	@Security		auth
-//	@Tags			chat
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		string						true	"user id to chat with"
-//	@Param			chat	body		param.ChatMessageRequest	true	"Chat message"
-//	@Success		201		{object}	param.ChatMessageResponse
-//	@Router			/chat/{id} [post]
-func (h Handler) ChatWithOtherUser(c echo.Context) error {
-	var req param.ChatMessageRequest
-	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if err := h.validator.ValidateChatMessageRequest(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	userIDToChatWith := c.Param("id")
-	if userIDToChatWith == "" {
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-
-	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
-
-	res, err := h.chatSvc.ChatWithOtherUser(c.Request().Context(), req, claims.ID, userIDToChatWith)
-	if err != nil {
-		code, msg := httperr.Error(err)
-		return echo.NewHTTPError(code, msg)
-	}
-
-	return c.JSON(http.StatusCreated, res)
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// GetChatMessages godoc
-//
-//	@Summary		Get chat history
-//	@Description	History of chat
-//	@Security		auth
-//	@Tags			chat
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int							true	"Account ID"
-//	@Param			chat	body		param.GetChatHistoryRequest	false	"Chat message"
-//	@Success		200		{object}	param.GetChatHistoryResponse
-//	@Router			/chat/{id} [get]
-func (h Handler) GetChatMessages(c echo.Context) error {
-	userIDToChatWith := c.Param("id")
-	if userIDToChatWith == "" {
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+var connections = make(map[string]*websocket.Conn)
 
+func (h Handler) Chat(c echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
 
-	res, err := h.chatSvc.GetChatHistory(c.Request().Context(),
-		param.GetChatHistoryRequest{}, claims.ID, userIDToChatWith)
+	conn, err := upgrader.Upgrade(c.Response().Writer, c.Request(), nil)
 	if err != nil {
-		code, msg := httperr.Error(err)
-		return echo.NewHTTPError(code, msg)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	defer conn.Close()
+
+	var connectionLocker sync.RWMutex
+	connectionLocker.RLock()
+	connections[claims.ID] = conn
+	connectionLocker.RUnlock()
+
+	go func() {
+		for {
+			var req param.PrivateChattingRequest
+			if err := conn.ReadJSON(&req); err != nil {
+				conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				continue
+			}
+			if err := h.validator.ValidatePrivateChatMessageRequest(req); err != nil {
+				conn.WriteJSON(err)
+				continue
+			}
+			switch req.Action {
+			case param.ActionSendTextMessage:
+				_, err := h.userSvc.GetUserByID(c.Request().Context(), param.GetUserByIDRequest{UserID: req.ReceiverID})
+				if err != nil {
+					_, msg := httperr.Error(err)
+					conn.WriteMessage(websocket.TextMessage, []byte(msg))
+					continue
+				}
+
+				chat, err := h.chatSvc.GetPrivateChatByName(c.Request().Context(), param.GetPrivateChatByNameRequest{
+					SenderID:   claims.ID,
+					ReceiverID: req.ReceiverID,
+				})
+				if err != nil {
+					conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+					continue
+				}
+				if chat == nil {
+					ch, err := h.chatSvc.CreatePrivateChat(c.Request().Context(), param.CreatePrivateChatRequest{
+						Sender:   claims.ID,
+						Receiver: req.ReceiverID,
+					})
+					if err != nil {
+						conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+						continue
+					}
+					if _, err := h.chatSvc.InsertPrivateChatParticipants(c.Request().Context(), param.InsertPrivateChatParticipantsRequest{
+						ChatID:  ch.ChatID,
+						UserID1: claims.ID,
+						UserID2: req.ReceiverID,
+					}); err != nil {
+						_, msg := httperr.Error(err)
+						conn.WriteMessage(websocket.TextMessage, []byte(msg))
+						continue
+					}
+					chat = &param.GetPrivateChatByNameResponse{
+						ChatID:   ch.ChatID,
+						ChatName: ch.ChatID,
+					}
+				}
+
+				p := param.PrivateMessageRequest{
+					ChatID:   chat.ChatID,
+					SenderID: claims.ID,
+					Content:  req.Content,
+					Type:     req.Type,
+				}
+
+				_, err = h.msgService.SavePrivateMessage(c.Request().Context(), p)
+				if err != nil {
+					_, msg := httperr.Error(err)
+					conn.WriteJSON(`{message:` + msg + `}`) // TODO - turn this to right json format
+					continue
+				}
+
+				conn.WriteMessage(websocket.TextMessage, []byte("saved message"))
+
+			//case param.ActionReadTextMessage:
+
+			default:
+				conn.WriteMessage(websocket.TextMessage, []byte("wrong action type"))
+			}
+		}
+	}()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return nil
+			}
+		}
 	}
 
-	return c.JSON(http.StatusOK, res)
-}
-
-// GetUserChats godoc
-//
-//	@Summary		List chats
-//	@Description	List all user chats
-//	@Security		auth
-//	@Tags			chat
-//	@Accept			json
-//	@Produce		json
-//	@Param			chat	body		param.GetUserChatsRequest	false	"Chat message"
-//	@Success		200		{object}	param.GetUserChatResponse
-//	@Router			/chat [get]
-func (h Handler) GetUserChats(c echo.Context) error {
-	claims := claims.GetClaimsFromEchoContext(c, h.authCfg)
-
-	res, err := h.chatSvc.ListUserChats(c.Request().Context(), param.GetUserChatsRequest{}, claims.ID)
-	if err != nil {
-		code, msg := httperr.Error(err)
-		return echo.NewHTTPError(code, msg)
-	}
-
-	return c.JSON(http.StatusOK, res)
+	return nil
 }

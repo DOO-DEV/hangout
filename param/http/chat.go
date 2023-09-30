@@ -15,8 +15,8 @@ type CreatePrivateChatResponse struct {
 }
 
 type GetPrivateChatByNameRequest struct {
-	Sender   string `json:"sender"`
-	Receiver string `json:"receiver"`
+	SenderID   string `json:"sender_id"`
+	ReceiverID string `json:"receiver_id"`
 }
 
 type GetPrivateChatByNameResponse struct {
@@ -55,4 +55,19 @@ type GetUserChatsRequest struct {
 
 type GetUserChatResponse struct {
 	Data []string `json:"data"`
+}
+
+type PrivateChatAction string
+
+const (
+	ActionSendTextMessage PrivateChatAction = "send_txt_msg"
+	ActionReadTextMessage PrivateChatAction = "read_txt_msg"
+)
+
+type PrivateChattingRequest struct {
+	Action     PrivateChatAction `json:"action"`
+	ChatID     string            `json:"chat_id"`
+	ReceiverID string            `json:"receiver_id"`
+	Content    string            `json:"content"`
+	Type       int               `json:"type"`
 }

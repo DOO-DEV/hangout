@@ -8,10 +8,12 @@ import (
 	"hangout/repository/postgres"
 	pgchat "hangout/repository/postgres/chat"
 	pggroup "hangout/repository/postgres/group"
+	pgmessage "hangout/repository/postgres/message"
 	pguser "hangout/repository/postgres/user"
 	authservice "hangout/service/auth"
 	chatservice "hangout/service/chat"
 	groupservice "hangout/service/group"
+	messageservice "hangout/service/message"
 	userservice "hangout/service/user"
 	"hangout/validator/chatvalidator"
 	"hangout/validator/groupvalidator"
@@ -26,6 +28,7 @@ type services struct {
 	authSvc        authservice.Service
 	chatSvc        chatservice.Service
 	chatValidator  chatvalidator.Validator
+	messageSvc     messageservice.Service
 }
 
 // @title					Hangout
@@ -56,6 +59,7 @@ func main() {
 		svc.authSvc,
 		cfg.Auth,
 		svc.chatValidator,
+		svc.messageSvc,
 		svc.chatSvc,
 	)
 
@@ -76,8 +80,12 @@ func setupServices(cfg *config.Config) *services {
 	groupValidator := groupvalidator.New()
 
 	chatRepo := pgchat.New(pgDB)
-	chatSvc := chatservice.New(chatRepo, groupRepo, userRepo)
+	chatSvc := chatservice.New(chatRepo, groupRepo)
 	chatValidator := chatvalidator.New()
+
+	msgRepo := pgmessage.New(pgDB)
+	messageSvc := messageservice.New(msgRepo)
+
 	return &services{
 		userValidator:  userValidator,
 		userSvc:        userSvc,
@@ -86,5 +94,6 @@ func setupServices(cfg *config.Config) *services {
 		authSvc:        authSvc,
 		chatSvc:        chatSvc,
 		chatValidator:  chatValidator,
+		messageSvc:     messageSvc,
 	}
 }

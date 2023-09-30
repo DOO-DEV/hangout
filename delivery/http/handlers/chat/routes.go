@@ -6,11 +6,6 @@ import (
 )
 
 func (h Handler) SetRoutes(g *echo.Group) {
-	withAuth := g.Group("", authmiddleware.Auth(h.authSvc, h.authCfg))
-
-	chat := withAuth.Group("/chats")
-	chat.POST("/:id", h.ChatWithOtherUser)
-	chat.GET("/:id", h.GetChatMessages)
-	chat.GET("", h.GetUserChats)
-
+	g.GET("/chats",
+		h.Chat, authmiddleware.Auth(h.authSvc, h.authCfg))
 }
