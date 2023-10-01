@@ -1,6 +1,7 @@
 package chathandler
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	param "hangout/param/http"
@@ -42,65 +43,10 @@ func (h Handler) Chat(c echo.Context) error {
 				conn.WriteJSON(err)
 				continue
 			}
+
 			switch req.Action {
 			case param.ActionSendTextMessage:
-				_, err := h.userSvc.GetUserByID(c.Request().Context(), param.GetUserByIDRequest{UserID: req.ReceiverID})
-				if err != nil {
-					_, msg := httperr.Error(err)
-					conn.WriteMessage(websocket.TextMessage, []byte(msg))
-					continue
-				}
-
-				chat, err := h.chatSvc.GetPrivateChatByName(c.Request().Context(), param.GetPrivateChatByNameRequest{
-					SenderID:   claims.ID,
-					ReceiverID: req.ReceiverID,
-				})
-				if err != nil {
-					conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-					continue
-				}
-				if chat == nil {
-					ch, err := h.chatSvc.CreatePrivateChat(c.Request().Context(), param.CreatePrivateChatRequest{
-						Sender:   claims.ID,
-						Receiver: req.ReceiverID,
-					})
-					if err != nil {
-						conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-						continue
-					}
-					if _, err := h.chatSvc.InsertPrivateChatParticipants(c.Request().Context(), param.InsertPrivateChatParticipantsRequest{
-						ChatID:  ch.ChatID,
-						UserID1: claims.ID,
-						UserID2: req.ReceiverID,
-					}); err != nil {
-						_, msg := httperr.Error(err)
-						conn.WriteMessage(websocket.TextMessage, []byte(msg))
-						continue
-					}
-					chat = &param.GetPrivateChatByNameResponse{
-						ChatID:   ch.ChatID,
-						ChatName: ch.ChatID,
-					}
-				}
-
-				p := param.PrivateMessageRequest{
-					ChatID:   chat.ChatID,
-					SenderID: claims.ID,
-					Content:  req.Content,
-					Type:     req.Type,
-				}
-
-				_, err = h.msgService.SavePrivateMessage(c.Request().Context(), p)
-				if err != nil {
-					_, msg := httperr.Error(err)
-					conn.WriteJSON(`{message:` + msg + `}`) // TODO - turn this to right json format
-					continue
-				}
-
-				conn.WriteMessage(websocket.TextMessage, []byte("saved message"))
-
-			//case param.ActionReadTextMessage:
-
+				go h.ReceivePrivateMessage(c.Request().Context(), conn, req, claims.ID)
 			default:
 				conn.WriteMessage(websocket.TextMessage, []byte("wrong action type"))
 			}
@@ -120,4 +66,63 @@ func (h Handler) Chat(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h Handler) ReceivePrivateMessage(ctx context.Context, conn *websocket.Conn, req param.PrivateChattingRequest, userID string) {
+	_, err := h.userSvc.GetUserByID(ctx, param.GetUserByIDRequest{UserID: req.ReceiverID})
+	if err != nil {
+		_, msg := httperr.Error(err)
+		conn.WriteMessage(websocket.TextMessage, []byte(msg))
+		return
+	}
+
+	chat, err := h.chatSvc.GetPrivateChatByName(ctx, param.GetPrivateChatByNameRequest{
+		SenderID:   userID,
+		ReceiverID: req.ReceiverID,
+	})
+	if err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		return
+	}
+	if chat == nil {
+		ch, err := h.chatSvc.CreatePrivateChat(ctx, param.CreatePrivateChatRequest{
+			Sender:   userID,
+			Receiver: req.ReceiverID,
+		})
+		if err != nil {
+			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			return
+		}
+		if _, err := h.chatSvc.InsertPrivateChatParticipants(ctx, param.InsertPrivateChatParticipantsRequest{
+			ChatID:  ch.ChatID,
+			UserID1: userID,
+			UserID2: req.ReceiverID,
+		}); err != nil {
+			_, msg := httperr.Error(err)
+			conn.WriteMessage(websocket.TextMessage, []byte(msg))
+			return
+		}
+		chat = &param.GetPrivateChatByNameResponse{
+			ChatID:   ch.ChatID,
+			ChatName: ch.ChatID,
+		}
+	}
+
+	p := param.PrivateMessageRequest{
+		ChatID:   chat.ChatID,
+		SenderID: userID,
+		Content:  req.Content,
+		Type:     req.Type,
+	}
+
+	_, err = h.msgService.SavePrivateMessage(ctx, p)
+	if err != nil {
+		_, msg := httperr.Error(err)
+		conn.WriteMessage(websocket.TextMessage, []byte(msg))
+		return
+	}
+
+	conn.WriteMessage(websocket.TextMessage, []byte("saved message"))
+
+	return
 }
