@@ -28,6 +28,11 @@ const (
 	maxMessageSize = 10000
 )
 
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
+)
+
 type Message struct {
 }
 
@@ -79,7 +84,44 @@ func (c *Client) readPump() {
 		c.handleNewMessage(jsonMsg)
 	}
 }
-func (c *Client) writePump()                  {}
+func (c *Client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.send:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+
+			w.Write(message)
+
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				w.Write(newline)
+				w.Write(<-c.send)
+			}
+			case <-ticker.C:
+				c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+				if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
+			}
+		}
+	}
+}
+
 func (c *Client) disconnect()                 {}
 func (c *Client) handleNewMessage(msg []byte) {}
 
