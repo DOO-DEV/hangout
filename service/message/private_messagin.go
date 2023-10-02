@@ -27,5 +27,6 @@ func (s Service) SavePrivateMessage(ctx context.Context, req param.PrivateMessag
 	return &param.PrivateMessageResponse{
 		Timestamp: msg.Timestamp,
 		ID:        msg.ID,
+		Content:   msg.Content,
 	}, nil
 }

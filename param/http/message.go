@@ -10,8 +10,10 @@ type PrivateMessageRequest struct {
 }
 
 type PrivateMessageResponse struct {
-	Timestamp time.Time `json:"timestamp"`
-	ID        string    `json:"id"`
+	ReceiverID string    `json:"receiver_id"`
+	Timestamp  time.Time `json:"timestamp"`
+	Content    string    `json:"content"`
+	ID         string    `json:"id"`
 }
 
 type GroupChatMessageRequest struct {
