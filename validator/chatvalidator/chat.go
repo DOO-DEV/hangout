@@ -6,11 +6,11 @@ import (
 	param "hangout/param/http"
 )
 
-func (v Validator) ValidatePrivateChatMessageRequest(req param.PrivateChattingRequest) error {
+func (v Validator) ValidatePrivateChatMessageRequest(req param.PrivateMessageRequest) error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.Content, validation.Required),
-		validation.Field(&req.Type, validation.Required),
-		validation.Field(&req.Action, validation.Required),
-		validation.Field(&req.ReceiverID, validation.Required, is.UUID),
+		validation.Field(&req.Content, is.Alphanumeric),
+		validation.Field(&req.Type, is.Int),
+		validation.Field(&req.Action, validation.Required, is.Int),
+		validation.Field(&req.ReceiverID, is.UUID),
 	)
 }

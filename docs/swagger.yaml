@@ -221,7 +221,7 @@ paths:
       parameters:
       - description: Chat message
         in: body
-        name: chat
+        name: privatechat
         schema:
           $ref: '#/definitions/param.GetUserChatsRequest'
       produces:
@@ -235,12 +235,12 @@ paths:
       - auth: []
       summary: List chats
       tags:
-      - chat
+      - privatechat
   /chat/{id}:
     get:
       consumes:
       - application/json
-      description: History of chat
+      description: History of privatechat
       parameters:
       - description: Account ID
         in: path
@@ -249,7 +249,7 @@ paths:
         type: integer
       - description: Chat message
         in: body
-        name: chat
+        name: privatechat
         schema:
           $ref: '#/definitions/param.GetChatHistoryRequest'
       produces:
@@ -261,22 +261,22 @@ paths:
             $ref: '#/definitions/param.GetChatHistoryResponse'
       security:
       - auth: []
-      summary: Get chat history
+      summary: Get privatechat history
       tags:
-      - chat
+      - privatechat
     post:
       consumes:
       - application/json
       description: Chat with other users
       parameters:
-      - description: user id to chat with
+      - description: user id to privatechat with
         in: path
         name: id
         required: true
         type: string
       - description: Chat message
         in: body
-        name: chat
+        name: privatechat
         required: true
         schema:
           $ref: '#/definitions/param.ChatMessageRequest'
@@ -291,7 +291,7 @@ paths:
       - auth: []
       summary: Chat with users
       tags:
-      - chat
+      - privatechat
   /connection_requests:
     get:
       consumes:

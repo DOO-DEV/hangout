@@ -1,4 +1,4 @@
-package chathandler
+package privatechathandler
 
 import (
 	authservice "hangout/service/auth"

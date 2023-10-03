@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/chat": {
+        "/privatechat": {
             "get": {
                 "security": [
                     {
@@ -34,13 +34,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chat"
+                    "privatechat"
                 ],
                 "summary": "List chats",
                 "parameters": [
                     {
                         "description": "Chat message",
-                        "name": "chat",
+                        "name": "privatechat",
                         "in": "body",
                         "schema": {
                             "$ref": "#/definitions/param.GetUserChatsRequest"
@@ -57,14 +57,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/chat/{id}": {
+        "/privatechat/{id}": {
             "get": {
                 "security": [
                     {
                         "auth": []
                     }
                 ],
-                "description": "History of chat",
+                "description": "History of privatechat",
                 "consumes": [
                     "application/json"
                 ],
@@ -72,9 +72,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chat"
+                    "privatechat"
                 ],
-                "summary": "Get chat history",
+                "summary": "Get privatechat history",
                 "parameters": [
                     {
                         "type": "integer",
@@ -85,7 +85,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "Chat message",
-                        "name": "chat",
+                        "name": "privatechat",
                         "in": "body",
                         "schema": {
                             "$ref": "#/definitions/param.GetChatHistoryRequest"
@@ -115,20 +115,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chat"
+                    "privatechat"
                 ],
                 "summary": "Chat with users",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "user id to chat with",
+                        "description": "user id to privatechat with",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "description": "Chat message",
-                        "name": "chat",
+                        "name": "privatechat",
                         "in": "body",
                         "required": true,
                         "schema": {

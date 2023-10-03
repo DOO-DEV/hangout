@@ -1,4 +1,4 @@
-package chathandler
+package privatechathandler
 
 import (
 	"github.com/labstack/echo/v4"
@@ -6,6 +6,5 @@ import (
 )
 
 func (h Handler) SetRoutes(g *echo.Group) {
-	g.GET("/chats",
-		h.Chat, authmiddleware.Auth(h.authSvc, h.authCfg))
+	g.GET("/chats", h.PrivateChaWsHandler, authmiddleware.Auth(h.authSvc, h.authCfg))
 }
