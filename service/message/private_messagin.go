@@ -8,7 +8,7 @@ import (
 	"hangout/pkg/richerror"
 )
 
-func (s Service) SavePrivateMessage(ctx context.Context, req param.PrivateMessageRequest) (*param.PrivateMessageResponse, error) {
+func (s Service) SavePrivateMessage(ctx context.Context, req param.SavePrivateMessageRequest) (*param.SavePrivateMessageResponse, error) {
 	const op = "MessageService.SavePrivateMessages"
 
 	m := entity.Message{
@@ -24,9 +24,8 @@ func (s Service) SavePrivateMessage(ctx context.Context, req param.PrivateMessag
 		return nil, richerror.New(op).WithError(err)
 	}
 
-	return &param.PrivateMessageResponse{
+	return &param.SavePrivateMessageResponse{
 		Timestamp: msg.Timestamp,
 		ID:        msg.ID,
-		Content:   msg.Content,
 	}, nil
 }

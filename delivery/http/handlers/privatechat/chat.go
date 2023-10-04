@@ -40,13 +40,13 @@ func (h Handler) PrivateChaWsHandler(c echo.Context) error {
 
 	userClient := client{conn: conn, handler: h}
 
-	go userClient.readPump()
+	go userClient.readPump(claims.ID)
 	go userClient.writePump()
 
 	return nil
 }
 
-func (c client) readPump() {
+func (c client) readPump(senderID string) {
 	defer c.conn.Close()
 
 	for {
@@ -74,7 +74,7 @@ func (c client) readPump() {
 
 		switch {
 		case prMsg.Action == param.SendPrivateMessageAction:
-			// set an timeout context
+			// set a timeout context
 			if prMsg.ReceiverID == "" {
 				c.conn.WriteMessage(websocket.TextMessage, []byte("receiver_id can't be empty"))
 				return
@@ -84,7 +84,33 @@ func (c client) readPump() {
 				return
 			}
 
-			c.handler.chatSvc.CreatePrivateChat()
+			// TODO - replace context.background
+			chat, err := c.handler.chatSvc.UpsertPrivateChat(context.Background(), param.UpsertPrivateChatRequest{
+				ReceiverID: prMsg.ReceiverID,
+				Content:    prMsg.Content,
+				Type:       prMsg.Type,
+				SenderID:   senderID,
+			})
+			if err != nil {
+				c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				return
+			}
+
+			res, err := c.handler.msgService.SavePrivateMessage(context.Background(), param.SavePrivateMessageRequest{
+				SenderID: senderID,
+				ChatID:   chat.ChatID,
+				Content:  prMsg.Content,
+				Type:     prMsg.Type,
+			})
+			if err != nil {
+				c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				return
+			}
+
+			if err := c.conn.WriteJSON(res); err != nil {
+				c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				return
+			}
 		}
 	}
 }

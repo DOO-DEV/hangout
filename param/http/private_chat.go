@@ -22,3 +22,27 @@ type PrivateMessageResponse struct {
 	Content    string    `json:"content"`
 	ID         string    `json:"id"`
 }
+
+type SavePrivateMessageRequest struct {
+	SenderID string `json:"sender_id"`
+	ChatID   string `json:"chat_id"`
+	Content  string `json:"content"`
+	Type     int    `json:"type"`
+}
+
+type SavePrivateMessageResponse struct {
+	ID        string    `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+type UpsertPrivateChatRequest struct {
+	ReceiverID string `json:"receiver_id"`
+	Content    string `json:"content"`
+	Type       int    `json:"type"`
+	SenderID   string `json:"sender_id"`
+}
+
+type UpsertPrivateChatResponse struct {
+	ChatID   string `json:"chat_id"`
+	ChatName string `json:"chat_name"`
+}

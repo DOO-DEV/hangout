@@ -17,14 +17,21 @@ type groupRepository interface {
 	CheckUserGroupConnection(ctx context.Context, u1, u2 string) (bool, error)
 }
 
-type Service struct {
-	chatRepo  chatRepository
-	groupRepo groupRepository
+type DeliveryStorage interface {
+	PublishToPrivateMessage(ctx context.Context) error
+	SubscribeToPrivateMessage(ctx context.Context) error
 }
 
-func New(chRepo chatRepository, gRepo groupRepository) Service {
+type Service struct {
+	chatRepo        chatRepository
+	groupRepo       groupRepository
+	deliveryStorage DeliveryStorage
+}
+
+func New(chRepo chatRepository, gRepo groupRepository, deliveryStorage DeliveryStorage) Service {
 	return Service{
-		chatRepo:  chRepo,
-		groupRepo: gRepo,
+		chatRepo:        chRepo,
+		groupRepo:       gRepo,
+		deliveryStorage: deliveryStorage,
 	}
 }

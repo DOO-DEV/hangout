@@ -6,7 +6,7 @@ import (
 	"hangout/pkg/richerror"
 )
 
-func (s Service) SendMessageToPrivateChat(ctx context.Context, req param.PrivateMessageRequest, senderID string) (*param.PrivateMessageResponse, error){
+func (s Service) UpsertPrivateChat(ctx context.Context, req param.UpsertPrivateChatRequest) (*param.UpsertPrivateChatResponse, error) {
 	// check for chat existence
 	// if not create a chat and update participants
 	// call save message and save message
@@ -15,26 +15,25 @@ func (s Service) SendMessageToPrivateChat(ctx context.Context, req param.Private
 	const op = "ChatService.SendMessageToPrivateChat"
 
 	chat, err := s.GetPrivateChatByName(ctx, param.GetPrivateChatByNameRequest{
-		SenderID:   senderID,
+		SenderID:   req.SenderID,
 		ReceiverID: req.ReceiverID,
 	})
 	if err != nil {
 		return nil, richerror.New(op).WithError(err)
 	}
 	if chat == nil {
-		newChat , err := s.CreatePrivateChat(ctx, param.CreatePrivateChatRequest{
-			Sender:   senderID,
+		newChat, err := s.CreatePrivateChat(ctx, param.CreatePrivateChatRequest{
+			Sender:   req.SenderID,
 			Receiver: req.ReceiverID,
 		})
 		if err != nil {
 			return nil, richerror.New(op).WithError(err)
 		}
 		// TODO - bring the db logic of this service to the create private chat.
-		// TODO - because it might this function break and participants never saved.
 		// TODO - do the above and blew function db operation in transaction
 		_, err = s.InsertPrivateChatParticipants(ctx, param.InsertPrivateChatParticipantsRequest{
 			ChatID:  newChat.ChatID,
-			UserID1: senderID,
+			UserID1: req.SenderID,
 			UserID2: req.ReceiverID,
 		})
 		if err != nil {
@@ -45,5 +44,8 @@ func (s Service) SendMessageToPrivateChat(ctx context.Context, req param.Private
 		chat.ChatName = newChat.ChatName
 	}
 
-	if err := s.s(ctx, para)
+	return &param.UpsertPrivateChatResponse{
+		ChatID:   chat.ChatID,
+		ChatName: chat.ChatName,
+	}, nil
 }

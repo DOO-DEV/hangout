@@ -2,6 +2,7 @@ package main
 
 import (
 	minioadapter "hangout/adapter/minio"
+	redisadapter "hangout/adapter/redis"
 	"hangout/config"
 	"hangout/delivery/http"
 	_ "hangout/docs"
@@ -79,8 +80,9 @@ func setupServices(cfg *config.Config) *services {
 	groupSvc := groupservice.New(groupRepo)
 	groupValidator := groupvalidator.New()
 
+	redisAdapter := redisadapter.New(cfg.Redis)
 	chatRepo := pgchat.New(pgDB)
-	chatSvc := chatservice.New(chatRepo, groupRepo)
+	chatSvc := chatservice.New(chatRepo, groupRepo, redisAdapter)
 	chatValidator := chatvalidator.New()
 
 	msgRepo := pgmessage.New(pgDB)
