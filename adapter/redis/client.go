@@ -1,26 +1,35 @@
 package redisadapter
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/redis/go-redis/v9"
+)
 
 type Config struct {
-	Port string `koanf:"port"`
-	Addr string `koanf:"addr"`
+	Host     string `koanf:"host"`
+	DB       int    `koanf:"db"`
+	Port     string `koanf:"port"`
+	Addr     string `koanf:"addr"`
+	Password string `koanf:"password"`
 }
 
 type Adapter struct {
-	rdb    *redis.Client
+	client *redis.Client
 	config Config
 }
 
 func New(cfg Config) Adapter {
-	client, err := redis.New()
-	if err != nil {
-		// TODO - decide to fatal or not?
-		fmt.Printf("can't connect to redis: %s", err)
-	}
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
+		Password: cfg.Password,
+		DB:       cfg.DB,
+	})
 
 	return Adapter{
-		rdb:    client,
-		config: cfg,
+		client: rdb,
 	}
+}
+
+func (a Adapter) Client() *redis.Client {
+	return a.client
 }

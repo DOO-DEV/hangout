@@ -46,3 +46,18 @@ type UpsertPrivateChatResponse struct {
 	ChatID   string `json:"chat_id"`
 	ChatName string `json:"chat_name"`
 }
+
+type SendToRecipientRequest struct {
+	ID         string    `json:"id"`
+	Content    string    `json:"content"`
+	Timestamp  time.Time `json:"timestamp"`
+	SenderID   string    `json:"receiver_id"`
+	ChatID     string    `json:"chat_id"`
+	Type       int       `json:"type"`
+	ReceiverID string    `json:"receiver_id"`
+}
+
+type SendToRecipientResponse struct {
+	Content   string    `json:"content"`
+	Timestamp time.Time `json:"timestamp"`
+}

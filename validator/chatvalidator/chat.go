@@ -8,9 +8,9 @@ import (
 
 func (v Validator) ValidatePrivateChatMessageRequest(req param.PrivateMessageRequest) error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.Content, is.Alphanumeric),
-		validation.Field(&req.Type, is.Int),
-		validation.Field(&req.Action, validation.Required, is.Int),
+		validation.Field(&req.Content),
+		validation.Field(&req.Type),
+		validation.Field(&req.Action, validation.Required),
 		validation.Field(&req.ReceiverID, is.UUID),
 	)
 }

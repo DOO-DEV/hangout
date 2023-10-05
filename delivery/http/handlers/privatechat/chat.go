@@ -41,14 +41,13 @@ func (h Handler) PrivateChaWsHandler(c echo.Context) error {
 	userClient := client{conn: conn, handler: h}
 
 	go userClient.readPump(claims.ID)
-	go userClient.writePump()
+	go userClient.writePump(claims.ID, claims.Username)
 
 	return nil
 }
 
 func (c client) readPump(senderID string) {
 	defer c.conn.Close()
-
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -63,7 +62,8 @@ func (c client) readPump(senderID string) {
 		// validate receiver
 		// send the event to private-chat-service
 		var prMsg param.PrivateMessageRequest
-		if err := json.Unmarshal(message, prMsg); err != nil {
+		if err := json.Unmarshal(message, &prMsg); err != nil {
+			c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
 		}
 
@@ -107,6 +107,18 @@ func (c client) readPump(senderID string) {
 				return
 			}
 
+			if err := c.handler.chatSvc.SendToRecipient(param.SendToRecipientRequest{
+				ID:         res.ID,
+				Content:    prMsg.Content,
+				Timestamp:  res.Timestamp,
+				SenderID:   senderID,
+				ChatID:     chat.ChatID,
+				Type:       prMsg.Type,
+				ReceiverID: prMsg.ReceiverID,
+			}); err != nil {
+				c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				return
+			}
 			if err := c.conn.WriteJSON(res); err != nil {
 				c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 				return
@@ -114,4 +126,15 @@ func (c client) readPump(senderID string) {
 		}
 	}
 }
-func (c client) writePump() {}
+func (c client) writePump(userID, username string) {
+	for {
+		res, err := c.handler.chatSvc.ListenForReceiveMessage(userID)
+		if err != nil {
+			c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			return
+		}
+
+		c.conn.WriteJSON(res)
+	}
+
+}

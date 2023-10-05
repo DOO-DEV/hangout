@@ -14,6 +14,16 @@ services:
       - MINIO_ROOT_PASSWORD=hangout-minio
     networks:
         - minio_network
+  redis:
+    image: bitnami/redis:6.2
+    container_name: hangout_redis
+    restart: always
+    ports:
+      - "6380:6379"
+    command: redis-server --loglevel warning --protected-mode no --save "" --appendonly no
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
 
 networks:
       minio_network:

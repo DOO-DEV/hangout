@@ -18,8 +18,8 @@ type groupRepository interface {
 }
 
 type DeliveryStorage interface {
-	PublishToPrivateMessage(ctx context.Context) error
-	SubscribeToPrivateMessage(ctx context.Context) error
+	PublishToPrivateMessage(message entity.Message, receiverID string) error
+	SubscribeToPrivateMessage(userID string, msgChan chan<- entity.Message)
 }
 
 type Service struct {
