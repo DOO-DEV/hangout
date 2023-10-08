@@ -13,3 +13,17 @@ type GroupChatMessageResponse struct {
 	Timestamp time.Time `json:"timestamp"`
 	ID        string    `json:"id"`
 }
+
+type GetUnreadMessagesRequest struct {
+	UserID string `json:"user_id"`
+}
+
+type GetUnreadMessagesResponse struct {
+}
+
+type SetStatusReadRequest struct {
+	MessageID string `json:"message_id"`
+}
+
+type SetStatusReadResponse struct {
+}

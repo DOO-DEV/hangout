@@ -37,3 +37,13 @@ func (d DB) SaveGroupMessage(ctx context.Context, msg entity.Message) (*entity.M
 
 	return &msg, nil
 }
+
+func (d DB) SetPrivateMessageAsRead(ctx context.Context, messageID string) error {
+	const op = "MessageRepository.SetPrivateMessageAsRead"
+
+	if _, err := d.conn.Conn().ExecContext(ctx, `update "private_messages" set "status" = "2"`); err != nil {
+		return richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	return nil
+}

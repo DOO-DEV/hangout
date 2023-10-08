@@ -41,7 +41,7 @@ func (h Handler) PrivateChaWsHandler(c echo.Context) error {
 	userClient := client{conn: conn, handler: h}
 
 	go userClient.readPump(claims.ID)
-	go userClient.writePump(claims.ID, claims.Username)
+	go userClient.writePump(claims.ID)
 
 	return nil
 }
@@ -126,15 +126,17 @@ func (c client) readPump(senderID string) {
 		}
 	}
 }
-func (c client) writePump(userID, username string) {
-	for {
-		res, err := c.handler.chatSvc.ListenForReceiveMessage(userID)
-		if err != nil {
-			c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-			return
-		}
 
-		c.conn.WriteJSON(res)
+func (c client) writePump(userID string) {
+	res, err := c.handler.chatSvc.ListenForReceiveMessage(userID)
+	if err != nil {
+		c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		return
 	}
-
+	c.conn.WriteJSON(res)
+	go func() {
+		if _, err := c.handler.msgService.SetStatusRead(context.Background(), param.SetStatusReadRequest{MessageID: res.Content}); err != nil {
+			c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		}
+	}()
 }

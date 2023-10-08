@@ -60,4 +60,5 @@ type SendToRecipientRequest struct {
 type SendToRecipientResponse struct {
 	Content   string    `json:"content"`
 	Timestamp time.Time `json:"timestamp"`
+	MessageID string    `json:"message_id"`
 }
