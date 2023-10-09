@@ -56,11 +56,6 @@ func (c client) readPump(senderID string) {
 			}
 		}
 
-		// turn message to json.
-		// check the action of message
-		// validate the payload of message
-		// validate receiver
-		// send the event to private-chat-service
 		var prMsg param.PrivateMessageRequest
 		if err := json.Unmarshal(message, &prMsg); err != nil {
 			c.conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
