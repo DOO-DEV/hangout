@@ -78,3 +78,25 @@ func (d DB) AddToPrivateChatParticipants(ctx context.Context, p1, p2 entity.Priv
 
 	return nil
 }
+
+func (d DB) GetPrivateChatMessages(ctx context.Context, chatID string) ([]entity.Message, error) {
+	const op = "GetPrivateChatMessages"
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "private_messages" where "chat_id" = $1`, chatID)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	messages := make([]entity.Message, 0)
+
+	for rows.Next() {
+		m := entity.Message{}
+		if err := rows.Scan(&m.ID, &m.ChatID, &m.SenderID, &m.Content, &m.Type, &m.Status, &m.Timestamp); err != nil {
+			return messages, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+		}
+
+		messages = append(messages, m)
+	}
+
+	return messages, nil
+}

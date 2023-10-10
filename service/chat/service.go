@@ -11,6 +11,7 @@ type chatRepository interface {
 	CreateGroupChat(ctx context.Context, group entity.GroupChat) (*entity.GroupChat, error)
 	GetGroupChatByID(ctx context.Context, groupID string) (*entity.GroupChat, error)
 	AddToPrivateChatParticipants(ctx context.Context, p1, p2 entity.PrivateChatParticipant) error
+	GetPrivateChatMessages(ctx context.Context, chatID string) ([]entity.Message, error)
 }
 
 type groupRepository interface {

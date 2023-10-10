@@ -71,3 +71,18 @@ type PrivateChattingRequest struct {
 	Content    string            `json:"content"`
 	Type       int               `json:"type"`
 }
+
+type GetPrivateChatMessages struct {
+	ChatID string `json:"chat_id"`
+}
+
+type PrivateChatMessages struct {
+	ID        string    `json:"id"`
+	Timestamp time.Time `json:"timestamp"`
+	Content   string    `json:"content"`
+	Status    int       `json:"status"`
+}
+
+type GetPrivateChatMessagesRepose struct {
+	Data []PrivateChatMessages `json:"data"`
+}
