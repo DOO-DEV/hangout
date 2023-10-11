@@ -100,3 +100,32 @@ func (d DB) GetPrivateChatMessages(ctx context.Context, chatID string) ([]entity
 
 	return messages, nil
 }
+
+func (d DB) GetUnreadPrivateChatMessages(ctx context.Context, userID string) ([]entity.Message, error) {
+	const op = "ChatRepository.GetUnreadPrivateChatMessages"
+
+	row := d.conn.Conn().QueryRowContext(ctx, `select "chat_id" from "private_chat_participants" where "user_id" = $1`, userID)
+	var chatID string
+	if err := row.Scan(&chatID); err != nil {
+		if d.conn.IsEmptyRowError(err) {
+			return nil, richerror.New(op).WithError(err).WithKind(richerror.KindNotFound).WithMessage(errmsg.ErrorMsgNotFound)
+		}
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	rows, err := d.conn.Conn().QueryContext(ctx, `select * from "private_messages" where "chat_id" = $1 and status="1"`, chatID)
+	if err != nil {
+		return nil, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+	}
+
+	messages := make([]entity.Message, 0)
+	for rows.Next() {
+		m := entity.Message{}
+		if err := rows.Scan(&m.ID, &m.ChatID, &m.SenderID, &m.Content, &m.Type, &m.Status, &m.Timestamp); err != nil {
+			return messages, richerror.New(op).WithError(err).WithKind(richerror.KindUnexpected).WithMessage(errmsg.ErrorMsgSomethingWentWrong)
+		}
+		messages = append(messages, m)
+	}
+
+	return messages, nil
+}
