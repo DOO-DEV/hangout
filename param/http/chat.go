@@ -86,3 +86,11 @@ type PrivateChatMessages struct {
 type GetPrivateChatMessagesRepose struct {
 	Data []PrivateChatMessages `json:"data"`
 }
+
+type GetUnreadPrivateChatMessagesRequest struct {
+	ChatID string `json:"chat_id"`
+}
+
+type GetUnreadPrivateChatMessagesResponse struct {
+	Data []PrivateChatMessages `json:"data"`
+}
